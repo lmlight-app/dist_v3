@@ -110,30 +110,6 @@ CREATE TABLE IF NOT EXISTS "Message" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Migrate existing Bot table (add new columns if missing)
-DO $$ BEGIN
-    ALTER TABLE "Bot" ADD COLUMN IF NOT EXISTS "shareType" "ShareType" NOT NULL DEFAULT 'PRIVATE';
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "Bot" ADD COLUMN IF NOT EXISTS "shareTagId" TEXT;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-
--- Migrate existing Tag table (rename color to description if needed)
-DO $$ BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'Tag' AND column_name = 'color') THEN
-        ALTER TABLE "Tag" RENAME COLUMN "color" TO "description";
-    END IF;
-END $$;
-DO $$ BEGIN
-    ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "description" TEXT;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-
 -- pgvector schema
 CREATE SCHEMA IF NOT EXISTS pgvector;
 CREATE TABLE IF NOT EXISTS pgvector.embeddings (
