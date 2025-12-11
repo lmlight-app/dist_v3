@@ -1,4 +1,7 @@
-# LM Light 利用マニュアル (永年ライセンス版)
+# LM Light 利用マニュアル (Perpetual License)
+
+> **ライセンス方式**: MACアドレスベース永続ライセンス
+> オフライン・オンプレミス環境に最適
 
 ## インストール
 
@@ -10,19 +13,19 @@
 
 **PowerShellスクリプト:**
 ```powershell
-irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
+irm https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-windows.ps1 | iex
 ```
 
 ### macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-macos.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-macos.sh | bash
 ```
 
 ### Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-linux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-linux.sh | bash
 ```
 
 ---
@@ -33,17 +36,17 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 
 **Docker:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-docker.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-docker.sh | bash
 ```
 
 または手動で:
 ```bash
 # イメージ取得
-curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-api-docker.tar.gz | docker load
+curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-perpetual-docker.tar.gz | docker load
 curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-web-docker.tar.gz | docker load
 
 # 起動
-docker run -d --name lmlight-api -p 8000:8000 --env-file .env lmlight-api
+docker run -d --name lmlight-perpetual -p 8000:8000 --env-file .env lmlight-perpetual
 docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
 ```
 
@@ -67,10 +70,10 @@ docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
 
 ```bash
 # macOS/Linux
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/db_setup.sh | bash
 
 # Windows
-irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.ps1 | iex
+irm https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/db_setup.ps1 | iex
 ```
 
 **DBリセット (⚠️ 全データ削除):**
@@ -107,18 +110,16 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 
 ※ インストーラーが自動設定します。手動変更が必要な場合のみ編集してください。
 
-### ライセンス (永年ライセンス版)
+### ライセンス (Perpetual License)
 
-永年ライセンスは**MACアドレスに紐づけ**られています。
+**ライセンス方式**: MACアドレスベース永続ライセンス
 
-1. 購入時に入力したMACアドレスのデバイスでのみ利用可能
-2. `license.lic` を `~/.local/lmlight/` に配置
-3. 有効期限なし（永年利用可能）
+- デバイスのMACアドレスに紐付けられた永続ライセンス
+- 有効期限なし (issued_atチェックなし)
+- オフライン・オンプレミス環境での利用に最適
+- 1ライセンス = 1デバイス
 
-**MACアドレスの確認方法:**
-- **Windows**: 設定 → ネットワークとインターネット → ネットワークの詳細設定 → 物理アドレス（MAC）
-- **Mac**: システム環境設定 → ネットワーク → 詳細 → ハードウェア
-- **Linux**: 設定 → ネットワーク → 設定アイコン（歯車） → 詳細タブ → MACアドレス
+`license.lic` を `~/.local/lmlight/` に配置
 
 ## 起動・停止
 
@@ -182,32 +183,20 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 
 ```
 ~/.local/lmlight/
-├── api             # APIバイナリ
+├── api             # APIバイナリ (lmlight-perpetual-*)
 ├── web/            # Webフロントエンド
 ├── .env            # 設定ファイル
-├── license.lic     # ライセンス (MACアドレス紐づけ)
+├── license.lic     # ライセンス (MACアドレスベース)
 ├── start.sh        # 起動
 ├── stop.sh         # 停止
 └── logs/           # ログ
 ```
 
-## トラブルシューティング
+## ライセンス比較
 
-### ライセンスエラーが出る場合
-
-永年ライセンスはMACアドレスに紐づけられています。以下を確認してください:
-
-1. **購入時のMACアドレスと一致しているか**
-   - デバイスのMACアドレスを確認
-   - 購入時に入力したMACアドレスと同じか確認
-
-2. **ライセンスファイルが正しい場所にあるか**
-   - `~/.local/lmlight/license.lic` に配置されているか確認
-
-3. **別のデバイスで使用したい場合**
-   - 永年ライセンスは1つのMACアドレスにのみ紐づけられます
-   - 別のデバイスで使用する場合は、新しいライセンスの購入が必要です
-
-### その他のエラー
-
-その他のトラブルシューティングについては、[サポートページ](https://digital-base.co.jp/contact)までお問い合わせください。
+| 項目 | dist_v2 (Time-based) | dist_v3 (Perpetual) |
+|------|---------------------|---------------------|
+| ライセンスチェック | issued_at (有効期限) | MACアドレス |
+| オフライン利用 | 期限内のみ | 完全対応 |
+| ライセンスタイプ | サブスクリプション | 永続 |
+| 用途 | クラウド・更新環境 | オンプレミス・固定環境 |

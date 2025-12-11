@@ -1,0 +1,73 @@
+name: Build Windows Installer
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-installer:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download latest release artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Get latest release
+          $latestRelease = gh release view --json tagName,assets | ConvertFrom-Json
+
+          # Create releases directory
+          New-Item -ItemType Directory -Force -Path releases
+
+          # Download backend
+          $backendAsset = $latestRelease.assets | Where-Object { $_.name -eq "lmlight-api-windows-amd64.exe" } | Select-Object -First 1
+          if ($backendAsset) {
+            gh release download $latestRelease.tagName -p "lmlight-api-windows-amd64.exe" -D releases
+          } else {
+            Write-Error "Backend binary not found in latest release"
+            exit 1
+          }
+
+          # Download frontend
+          $frontendAsset = $latestRelease.assets | Where-Object { $_.name -eq "lmlight-web.tar.gz" } | Select-Object -First 1
+          if ($frontendAsset) {
+            gh release download $latestRelease.tagName -p "lmlight-web.tar.gz" -D releases
+
+            # Extract frontend
+            New-Item -ItemType Directory -Force -Path releases/frontend
+            tar -xzf releases/lmlight-web.tar.gz -C releases/frontend
+          } else {
+            Write-Error "Frontend archive not found in latest release"
+            exit 1
+          }
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup -y
+
+      - name: Build installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer/lmlight.iss
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LMLight-Setup
+          path: dist/LMLight-Setup-*.exe
+
+      - name: Upload to release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = $env:GITHUB_REF -replace 'refs/tags/', ''
+          $installer = Get-ChildItem -Path dist -Filter "LMLight-Setup-*.exe" | Select-Object -First 1
+          gh release upload $tag $installer.FullName --clobber
