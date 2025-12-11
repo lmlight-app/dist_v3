@@ -1,0 +1,213 @@
+# LM Light 利用マニュアル (永年ライセンス版)
+
+## インストール
+
+### Windows
+
+**EXEインストーラー (推奨):**
+1. [最新リリース](https://github.com/lmlight-app/dist_v3/releases/latest)から `LMLight-Setup-X.X.X.exe` をダウンロード
+2. ダブルクリックしてインストール
+
+**PowerShellスクリプト:**
+```powershell
+irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
+```
+
+### macOS
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-macos.sh | bash
+```
+
+### Linux
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-linux.sh | bash
+```
+
+---
+
+インストール先:
+- macOS/Linux: `~/.local/lmlight`
+- Windows: `%LOCALAPPDATA%\lmlight`
+
+**Docker:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-docker.sh | bash
+```
+
+または手動で:
+```bash
+# イメージ取得
+curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-api-docker.tar.gz | docker load
+curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-web-docker.tar.gz | docker load
+
+# 起動
+docker run -d --name lmlight-api -p 8000:8000 --env-file .env lmlight-api
+docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
+```
+
+## 環境構築 (インストール前に実行)
+
+### 必要な依存関係
+
+| 依存関係 | macOS | Linux (Ubuntu/Debian) | Windows |
+|---------|-------|----------------------|---------|
+| Node.js 18+ | `brew install node` | `sudo apt install nodejs npm` | `winget install OpenJS.NodeJS.LTS` |
+| PostgreSQL 16+ | `brew install postgresql@16` | `sudo apt install postgresql` | `winget install PostgreSQL.PostgreSQL` |
+| pgvector | `brew install pgvector` | `sudo apt install postgresql-16-pgvector` | [手動インストール](https://github.com/pgvector/pgvector#windows) |
+| Ollama | `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` | `winget install Ollama.Ollama` |
+| Tesseract OCR | `brew install tesseract` | `sudo apt install tesseract-ocr` | [UB-Mannheim版](https://github.com/UB-Mannheim/tesseract/wiki) |
+
+### データベース
+
+インストーラーがDB作成・テーブル作成・初期ユーザー作成を自動実行します。
+
+問題が発生した場合のみ手動実行:
+
+```bash
+# macOS/Linux
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.sh | bash
+
+# Windows
+irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.ps1 | iex
+```
+
+**DBリセット (⚠️ 全データ削除):**
+```bash
+psql -U postgres -c "DROP DATABASE lmlight;"
+# その後、上記のdb_setupを再実行
+```
+
+※ アップデート時も既存データは保持されます
+
+### Ollamaモデル
+
+[Ollama モデル一覧](https://ollama.com/search) から好みのモデルを選択:
+
+```bash
+ollama pull <model_name>        # 例: gemma3:4b, llama3.2, qwen2.5 など
+ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
+```
+
+### 設定ファイル (.env)
+
+インストール後、`~/.local/lmlight/.env` を編集:
+
+| 環境変数 | 説明 | デフォルト |
+|---------|------|-----------|
+| `DATABASE_URL` | PostgreSQL接続URL | `postgresql://<user>:<password>@localhost:5432/<database>` |
+| `OLLAMA_BASE_URL` | OllamaサーバーURL | `http://localhost:11434` |
+| `LICENSE_FILE_PATH` | ライセンスファイルのパス | `~/.local/lmlight/license.lic` |
+| `NEXTAUTH_SECRET` | セッション暗号化キー (任意の文字列) | - |
+| `NEXTAUTH_URL` | WebアプリのURL | `http://localhost:3000` |
+| `NEXT_PUBLIC_API_URL` | APIサーバーURL | `http://localhost:8000` |
+| `API_PORT` | APIポート | `8000` |
+| `WEB_PORT` | Webポート | `3000` |
+
+※ インストーラーが自動設定します。手動変更が必要な場合のみ編集してください。
+
+### ライセンス (永年ライセンス版)
+
+永年ライセンスは**MACアドレスに紐づけ**られています。
+
+1. 購入時に入力したMACアドレスのデバイスでのみ利用可能
+2. `license.lic` を `~/.local/lmlight/` に配置
+3. 有効期限なし（永年利用可能）
+
+**MACアドレスの確認方法:**
+- **Windows**: 設定 → ネットワークとインターネット → ネットワークの詳細設定 → 物理アドレス（MAC）
+- **Mac**: システム環境設定 → ネットワーク → 詳細 → ハードウェア
+- **Linux**: 設定 → ネットワーク → 設定アイコン（歯車） → 詳細タブ → MACアドレス
+
+## 起動・停止
+
+**macOS:**
+- Launchpad または `/Applications` から「LM Light」をクリック
+- Dockにピン留めしてトグル操作 (起動中→停止、停止中→起動)
+
+**Linux:**
+```bash
+# 起動
+~/.local/lmlight/start.sh
+
+# 停止
+~/.local/lmlight/stop.sh
+```
+
+**Windows:**
+- スタートメニュー → 「LM Light」をクリック
+- タスクバーにピン留めしてトグル操作
+
+または:
+```powershell
+& "$env:LOCALAPPDATA\lmlight\start.ps1"
+& "$env:LOCALAPPDATA\lmlight\stop.ps1"
+```
+
+## アクセス
+
+- Web: http://localhost:3000
+- API: http://localhost:8000
+
+デフォルトログイン: `admin@local` / `admin123`
+
+※ 初回ログイン後、パスワードを変更してください
+
+## アップデート
+
+同じインストールコマンドを再実行 (データは保持)
+
+## アンインストール
+
+**macOS:**
+```bash
+rm -rf ~/.local/lmlight
+rm -rf "/Applications/LM Light.app"
+```
+
+**Linux:**
+```bash
+rm -rf ~/.local/lmlight
+```
+
+**Windows:**
+- EXEインストーラー版: 設定 → アプリ → インストールされているアプリ → LM Light → アンインストール
+- PowerShellスクリプト版:
+```powershell
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
+```
+
+## ディレクトリ構造
+
+```
+~/.local/lmlight/
+├── api             # APIバイナリ
+├── web/            # Webフロントエンド
+├── .env            # 設定ファイル
+├── license.lic     # ライセンス (MACアドレス紐づけ)
+├── start.sh        # 起動
+├── stop.sh         # 停止
+└── logs/           # ログ
+```
+
+## トラブルシューティング
+
+### ライセンスエラーが出る場合
+
+永年ライセンスはMACアドレスに紐づけられています。以下を確認してください:
+
+1. **購入時のMACアドレスと一致しているか**
+   - デバイスのMACアドレスを確認
+   - 購入時に入力したMACアドレスと同じか確認
+
+2. **ライセンスファイルが正しい場所にあるか**
+   - `~/.local/lmlight/license.lic` に配置されているか確認
+
+3. **別のデバイスで使用したい場合**
+   - 永年ライセンスは1つのMACアドレスにのみ紐づけられます
+   - 別のデバイスで使用する場合は、新しいライセンスの購入が必要です
+
+### その他のエラー
+
+その他のトラブルシューティングについては、[サポートページ](https://digital-base.co.jp/contact)までお問い合わせください。
