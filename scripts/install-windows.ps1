@@ -1,10 +1,10 @@
 # LM Light インストーラー for Windows
-# 使い方: irm https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-windows.ps1 | iex
+# 使い方: irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
 # 設定
-$BASE_URL = if ($env:LMLIGHT_BASE_URL) { $env:LMLIGHT_BASE_URL } else { "https://github.com/lmlight-app/dist_v2/releases/latest/download" }
+$BASE_URL = if ($env:LMLIGHT_BASE_URL) { $env:LMLIGHT_BASE_URL } else { "https://github.com/lmlight-app/dist_v3/releases/latest/download" }
 $INSTALL_DIR = if ($env:LMLIGHT_INSTALL_DIR) { $env:LMLIGHT_INSTALL_DIR } else { "$env:LOCALAPPDATA\lmlight" }
 $ARCH = "amd64"  # Windows は x64 のみサポート
 
@@ -59,7 +59,7 @@ if (Test-Path "$INSTALL_DIR\bin\lmlight-api.exe") {
 Write-Info "ステップ 1/5: バイナリをダウンロード中..."
 
 Write-Info "バックエンドをダウンロード中..."
-$BACKEND_FILE = "lmlight-api-windows-$ARCH.exe"
+$BACKEND_FILE = "lmlight-perpetual-windows-$ARCH.exe"
 Invoke-WebRequest -Uri "$BASE_URL/$BACKEND_FILE" -OutFile "$INSTALL_DIR\bin\lmlight-api.exe" -UseBasicParsing
 Write-Success "バックエンドをダウンロードしました"
 
