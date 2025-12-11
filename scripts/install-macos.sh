@@ -2,7 +2,7 @@
 # LM Light Installer for macOS
 set -e
 
-BASE_URL="${LMLIGHT_BASE_URL:-https://github.com/lmlight-app/dist_v2/releases/latest/download}"
+BASE_URL="${LMLIGHT_BASE_URL:-https://github.com/lmlight-app/dist_v3/releases/latest/download}"
 INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight}"
 ARCH="$(uname -m)"
 case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esac
@@ -13,7 +13,7 @@ mkdir -p "$INSTALL_DIR"/{web,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
-curl -fSL "$BASE_URL/lmlight-api-macos-$ARCH" -o "$INSTALL_DIR/api"
+curl -fSL "$BASE_URL/lmlight-perpetual-macos-$ARCH" -o "$INSTALL_DIR/api"
 chmod +x "$INSTALL_DIR/api"
 
 curl -fSL "$BASE_URL/lmlight-web.tar.gz" -o "/tmp/lmlight-web.tar.gz"

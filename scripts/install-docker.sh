@@ -1,6 +1,6 @@
 #!/bin/bash
 # LM Light Docker Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-docker.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-docker.sh | bash
 
 set -e
 
@@ -41,10 +41,10 @@ mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
 # Download and load Docker images
-BASE_URL="${LMLIGHT_BASE_URL:-https://github.com/lmlight-app/dist_v2/releases/latest/download}"
+BASE_URL="${LMLIGHT_BASE_URL:-https://github.com/lmlight-app/dist_v3/releases/latest/download}"
 
 info "Downloading API image..."
-curl -fsSL "$BASE_URL/lmlight-api-docker.tar.gz" | docker load
+curl -fsSL "$BASE_URL/lmlight-perpetual-docker.tar.gz" | docker load
 
 info "Downloading Web image..."
 curl -fsSL "$BASE_URL/lmlight-web-docker.tar.gz" | docker load

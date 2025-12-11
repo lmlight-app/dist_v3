@@ -13,19 +13,19 @@
 
 **PowerShellスクリプト:**
 ```powershell
-irm https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-windows.ps1 | iex
+irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
 ```
 
 ### macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-macos.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-macos.sh | bash
 ```
 
 ### Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-linux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-linux.sh | bash
 ```
 
 ---
@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/in
 
 **Docker:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/install-docker.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-docker.sh | bash
 ```
 
 または手動で:
@@ -70,10 +70,10 @@ docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
 
 ```bash
 # macOS/Linux
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/db_setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.sh | bash
 
 # Windows
-irm https://raw.githubusercontent.com/lmlight-app/dist_v2/main/scripts/db_setup.ps1 | iex
+irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.ps1 | iex
 ```
 
 **DBリセット (⚠️ 全データ削除):**

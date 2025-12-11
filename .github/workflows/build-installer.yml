@@ -28,9 +28,9 @@ jobs:
           New-Item -ItemType Directory -Force -Path releases
 
           # Download backend
-          $backendAsset = $latestRelease.assets | Where-Object { $_.name -eq "lmlight-api-windows-amd64.exe" } | Select-Object -First 1
+          $backendAsset = $latestRelease.assets | Where-Object { $_.name -eq "lmlight-perpetual-windows-amd64.exe" } | Select-Object -First 1
           if ($backendAsset) {
-            gh release download $latestRelease.tagName -p "lmlight-api-windows-amd64.exe" -D releases
+            gh release download $latestRelease.tagName -p "lmlight-perpetual-windows-amd64.exe" -D releases
           } else {
             Write-Error "Backend binary not found in latest release"
             exit 1
