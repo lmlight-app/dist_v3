@@ -39,7 +39,7 @@ Name: "startmenu"; Description: "スタートメニューに追加"; GroupDescri
 
 [Files]
 ; Backend binary
-Source: "..\releases\lmlight-api-windows-amd64.exe"; DestDir: "{app}\bin"; DestName: "lmlight-api.exe"; Flags: ignoreversion
+Source: "..\releases\lmlight-perpetual-windows-amd64.exe"; DestDir: "{app}\bin"; DestName: "lmlight-api.exe"; Flags: ignoreversion
 
 ; Frontend (extracted from tar.gz during build)
 Source: "..\releases\frontend\*"; DestDir: "{app}\frontend"; Flags: ignoreversion recursesubdirs createallsubdirs
