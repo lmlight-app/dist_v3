@@ -296,7 +296,7 @@ VALUES (
     'admin-user-id',
     'admin@local',
     'Admin',
-    '`$2a`$12`$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.V4ferGqaJe.rHe',
+    '`$2b`$12`$AIctg50Pbt418E7ir3HlUOP1HWKO4PSP01HfIsx8v6Ab.Td7G5h72',
     'ADMIN',
     'ACTIVE',
     CURRENT_TIMESTAMP
