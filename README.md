@@ -196,9 +196,8 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 
 ## ライセンス比較
 
-| 項目 | dist_v2 (Time-based) | dist_v3 (Perpetual) |
+| 項目 | dist_v2 (Subscription) | dist_v3 (Perpetual) |
 |------|---------------------|---------------------|
 | ライセンスチェック | issued_at (有効期限) | MACアドレス |
 | オフライン利用 | 期限内のみ | 完全対応 |
 | ライセンスタイプ | サブスクリプション | 永続 |
-| 用途 | クラウド・更新環境 | オンプレミス・固定環境 |
