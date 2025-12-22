@@ -1,6 +1,6 @@
 # LM Light 利用マニュアル (Perpetual License)
 
-> **ライセンス方式**: MACアドレスベース永続ライセンス
+> **ライセンス方式**: Hardware UUIDベース永続ライセンス
 > オフライン・オンプレミス環境に最適
 
 ## インストール
@@ -114,9 +114,9 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 
 ### ライセンス (Perpetual License)
 
-**ライセンス方式**: MACアドレスベース永続ライセンス
+**ライセンス方式**: Hardware UUIDベース永続ライセンス
 
-- デバイスのMACアドレスに紐付けられた永続ライセンス
+- デバイスのHardware UUIDに紐付けられた永続ライセンス
 - 有効期限なし (issued_atチェックなし)
 - オフライン・オンプレミス環境での利用に最適
 - 1ライセンス = 1デバイス
@@ -188,7 +188,7 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 ├── api             # APIバイナリ (lmlight-perpetual-*)
 ├── web/            # Webフロントエンド
 ├── .env            # 設定ファイル
-├── license.lic     # ライセンス (MACアドレスベース)
+├── license.lic     # ライセンス (Hardware UUIDベース)
 ├── start.sh        # 起動
 ├── stop.sh         # 停止
 └── logs/           # ログ
@@ -198,6 +198,6 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 
 | 項目 | dist_v2 (Subscription) | dist_v3 (Perpetual) |
 |------|---------------------|---------------------|
-| ライセンスチェック | issued_at (有効期限) | MACアドレス |
+| ライセンスチェック | issued_at (有効期限) | Hardware UUID |
 | オフライン利用 | 期限内のみ | 完全対応 |
 | ライセンスタイプ | サブスクリプション | 永続 |
