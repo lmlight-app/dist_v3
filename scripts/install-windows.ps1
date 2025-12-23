@@ -36,7 +36,7 @@ if (-not $isAdmin) {
 
 # ディレクトリ作成
 New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\bin" | Out-Null
-New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\frontend" | Out-Null
+New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\web" | Out-Null
 New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\data" | Out-Null
 New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\logs" | Out-Null
 New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\scripts" | Out-Null
@@ -71,12 +71,15 @@ Invoke-WebRequest -Uri "$BASE_URL/lmlight-web.tar.gz" -OutFile $TEMP_TAR -UseBas
 $WORK_DIR = "$env:TEMP\lmlight-web-$PID"
 New-Item -ItemType Directory -Force -Path $WORK_DIR | Out-Null
 tar -xzf $TEMP_TAR -C $WORK_DIR
-
-# frontendディレクトリを置き換え
-if (Test-Path "$INSTALL_DIR\frontend") {
-    Remove-Item -Recurse -Force "$INSTALL_DIR\frontend"
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "tar展開に失敗しました (code: $LASTEXITCODE)"
 }
-Move-Item -Path $WORK_DIR -Destination "$INSTALL_DIR\frontend"
+
+# webディレクトリを置き換え
+if (Test-Path "$INSTALL_DIR\web") {
+    Remove-Item -Recurse -Force "$INSTALL_DIR\web"
+}
+Move-Item -Path $WORK_DIR -Destination "$INSTALL_DIR\web"
 Remove-Item -Force $TEMP_TAR
 
 Write-Success "フロントエンドをダウンロードしました"
@@ -413,7 +416,7 @@ Start-Sleep -Seconds 3
 
 # Web 起動
 Write-Host "Web を起動中..."
-Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$PROJECT_ROOT\frontend" -WindowStyle Hidden -RedirectStandardOutput "$PROJECT_ROOT\logs\web.log" -RedirectStandardError "$PROJECT_ROOT\logs\web.err"
+Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$PROJECT_ROOT\web" -WindowStyle Hidden -RedirectStandardOutput "$PROJECT_ROOT\logs\web.log" -RedirectStandardError "$PROJECT_ROOT\logs\web.err"
 Start-Sleep -Seconds 3
 
 Write-Host ""
