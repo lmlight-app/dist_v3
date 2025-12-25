@@ -18,7 +18,7 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 
 ### Windows
 
-**PowerShellスクリプト(β版):**
+**PowerShellスクリプト:**
 ```powershell
 irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
 ```
