@@ -27,7 +27,7 @@ irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-w
 
 インストール先:
 - macOS/Linux: `~/.local/lmlight`
-- Windows: `%APPDATA%\lmlight`
+- Windows: ` ~\AppData\Local\lmlight`
 
 **Docker:**
 ```bash
@@ -92,7 +92,9 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 
 ### 設定ファイル (.env)
 
-インストール後、`~/.local/lmlight/.env` を編集:
+インストール後、`.env` を編集:
+- macOS/Linux: `~/.local/lmlight/.env`
+- Windows: ` ~\AppData\Local\lmlight/.env`
 
 | 環境変数 | 説明 | デフォルト |
 |---------|------|-----------|
@@ -116,7 +118,10 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 - オフライン・オンプレミス環境での利用に最適
 - 1ライセンス = 1デバイス
 
-`license.lic` を `~/.local/lmlight/` に配置
+`license.lic` を下記に配置
+- macOS/Linux: `~/.local/lmlight`
+- Windows: ` ~\AppData\Local\lmlight`
+
 
 ## 起動・停止
 
@@ -128,7 +133,6 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 ```bash
 # 起動
 ~/.local/lmlight/start.sh
-
 # 停止
 ~/.local/lmlight/stop.sh
 ```
