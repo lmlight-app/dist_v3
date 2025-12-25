@@ -18,7 +18,6 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 
 ### Windows
 
-**PowerShellスクリプト:**
 ```powershell
 irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
 ```
@@ -27,7 +26,7 @@ irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-w
 
 インストール先:
 - macOS/Linux: `~/.local/lmlight`
-- Windows: ` ~\AppData\Local\lmlight`
+- Windows: `%LOCALAPPDATA%\lmlight`
 
 **Docker:**
 ```bash
@@ -55,7 +54,7 @@ docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
 | PostgreSQL 16+ | `brew install postgresql@16` | `sudo apt install postgresql` | `winget install PostgreSQL.PostgreSQL` |
 | pgvector | `brew install pgvector` | `sudo apt install postgresql-16-pgvector` | [手動インストール](https://github.com/pgvector/pgvector#windows) |
 | Ollama | `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` | `winget install Ollama.Ollama` |
-| Tesseract OCR | `brew install tesseract` | `sudo apt install tesseract-ocr` | [UB-Mannheim版](https://github.com/UB-Mannheim/tesseract/wiki) |
+| Tesseract OCR (任意) | `brew install tesseract` | `sudo apt install tesseract-ocr` | `winget install UB-Mannheim.TesseractOCR` |
 
 ### データベース
 
@@ -94,7 +93,7 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 
 インストール後、`.env` を編集:
 - macOS/Linux: `~/.local/lmlight/.env`
-- Windows: ` ~\AppData\Local\lmlight/.env`
+- Windows: `%LOCALAPPDATA%\lmlight\.env`
 
 | 環境変数 | 説明 | デフォルト |
 |---------|------|-----------|
@@ -118,9 +117,10 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 - オフライン・オンプレミス環境での利用に最適
 - 1ライセンス = 1デバイス
 
-`license.lic` を下記に配置
-- macOS/Linux: `~/.local/lmlight`
-- Windows: ` ~\AppData\Local\lmlight`
+`license.lic` を下記に配置:
+
+- macOS/Linux: `~/.local/lmlight/license.lic`
+- Windows: `%LOCALAPPDATA%\lmlight\license.lic`
 
 
 ## 起動・停止
@@ -138,13 +138,18 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 ```
 
 **Windows:**
+
 - スタートメニュー → 「LM Light」をクリック
 - タスクバーにピン留めしてトグル操作
 
-または:
+コマンドラインから実行:
+
 ```powershell
-& "$env:LOCALAPPDATA\lmlight\start.ps1"
-& "$env:LOCALAPPDATA\lmlight\stop.ps1"
+# 起動
+powershell -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\lmlight\start.ps1"
+
+# 停止
+powershell -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\lmlight\stop.ps1"
 ```
 
 ## アクセス
@@ -174,8 +179,7 @@ rm -rf ~/.local/lmlight
 ```
 
 **Windows:**
-- EXEインストーラー版: 設定 → アプリ → インストールされているアプリ → LM Light → アンインストール
-- PowerShellスクリプト版:
+
 ```powershell
 Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 ```
