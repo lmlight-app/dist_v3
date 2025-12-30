@@ -250,71 +250,19 @@ echo "Stopped"
 EOF
 chmod +x "$INSTALL_DIR/stop.sh"
 
-# Create .app bundles in /Applications
-APP_DIR="/Applications/LM Light.app"
-mkdir -p "$APP_DIR/Contents/MacOS"
-cat > "$APP_DIR/Contents/MacOS/LM Light" << 'APPEOF'
+# Create lmlight CLI script
+cat > "$INSTALL_DIR/lmlight" << 'EOF'
 #!/bin/bash
-INSTALL_DIR="$HOME/.local/lmlight"
-cd "$INSTALL_DIR"
-
-# Load .env
-set -a; [ -f .env ] && source .env; set +a
-
-# Simple toggle: running → stop, not running → start
-if curl -s http://localhost:${API_PORT:-8000}/health >/dev/null 2>&1; then
-    # Running → Stop
-    "$INSTALL_DIR/stop.sh"
-    osascript -e 'display notification "LM Light stopped" with title "LM Light"'
-    exit 0
-fi
-
-# Not running → Start
-"$INSTALL_DIR/start.sh" &
-
-# Wait for API to be ready (max 30 sec)
-for i in {1..30}; do
-    if curl -s http://localhost:${API_PORT:-8000}/health >/dev/null 2>&1; then
-        sleep 1
-        open "http://localhost:${WEB_PORT:-3000}"
-        osascript -e 'display notification "LM Light is running" with title "LM Light"'
-        exit 0
-    fi
-    sleep 1
-done
-
-osascript -e 'display alert "LM Light" message "Failed to start. Check ~/.local/lmlight/logs/"'
-APPEOF
-chmod +x "$APP_DIR/Contents/MacOS/LM Light"
-
-# Download and install icon
-mkdir -p "$APP_DIR/Contents/Resources"
-curl -fSL "$BASE_URL/LMLight.icns" -o "$APP_DIR/Contents/Resources/AppIcon.icns" 2>/dev/null || true
-
-cat > "$APP_DIR/Contents/Info.plist" << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>CFBundleExecutable</key>
-    <string>LM Light</string>
-    <key>CFBundleName</key>
-    <string>LM Light</string>
-    <key>CFBundleIdentifier</key>
-    <string>app.lmlight</string>
-    <key>CFBundleVersion</key>
-    <string>1.0</string>
-    <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>NSHighResolutionCapable</key>
-    <true/>
-</dict>
-</plist>
+LMLIGHT_HOME="${LMLIGHT_HOME:-$HOME/.local/lmlight}"
+case "$1" in
+    start) "$LMLIGHT_HOME/start.sh" ;;
+    stop)  "$LMLIGHT_HOME/stop.sh" ;;
+    *)     echo "Usage: lmlight {start|stop}"; exit 1 ;;
+esac
 EOF
+chmod +x "$INSTALL_DIR/lmlight"
 
-touch "$APP_DIR"  # Refresh icon cache
-echo "App created: /Applications/LM Light.app"
+# Create symlink to /usr/local/bin (requires sudo)
+sudo ln -sf "$INSTALL_DIR/lmlight" /usr/local/bin/lmlight 2>/dev/null || echo "⚠️  Run: sudo ln -sf $INSTALL_DIR/lmlight /usr/local/bin/lmlight"
 
-echo "Done. Edit $INSTALL_DIR/.env then run: $INSTALL_DIR/start.sh"
+echo "Done. Edit $INSTALL_DIR/.env then run: lmlight start"

@@ -250,4 +250,19 @@ echo "Stopped"
 EOF
 chmod +x "$INSTALL_DIR/stop.sh"
 
-echo "Done. Edit $INSTALL_DIR/.env then run: $INSTALL_DIR/start.sh"
+# Create lmlight CLI script
+cat > "$INSTALL_DIR/lmlight" << 'EOF'
+#!/bin/bash
+LMLIGHT_HOME="${LMLIGHT_HOME:-$HOME/.local/lmlight}"
+case "$1" in
+    start) "$LMLIGHT_HOME/start.sh" ;;
+    stop)  "$LMLIGHT_HOME/stop.sh" ;;
+    *)     echo "Usage: lmlight {start|stop}"; exit 1 ;;
+esac
+EOF
+chmod +x "$INSTALL_DIR/lmlight"
+
+# Create symlink to /usr/local/bin (requires sudo)
+sudo ln -sf "$INSTALL_DIR/lmlight" /usr/local/bin/lmlight 2>/dev/null || echo "⚠️  Run: sudo ln -sf $INSTALL_DIR/lmlight /usr/local/bin/lmlight"
+
+echo "Done. Edit $INSTALL_DIR/.env then run: lmlight start"

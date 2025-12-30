@@ -125,32 +125,19 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 
 ## 起動・停止
 
-**macOS:**
-- Launchpad または `/Applications` から「LM Light」をクリック
-- Dockにピン留めしてトグル操作 (起動中→停止、停止中→起動)
-
-**Linux:**
+**macOS / Linux:**
 ```bash
-# 起動
-~/.local/lmlight/start.sh
-# 停止
-~/.local/lmlight/stop.sh
+lmlight start   # 起動
+lmlight stop    # 停止
 ```
 
 **Windows:**
-
-- スタートメニュー → 「LM Light」をクリック
-- タスクバーにピン留めしてトグル操作
-
-コマンドラインから実行:
-
 ```powershell
-# 起動
-powershell -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\lmlight\start.ps1"
-
-# 停止
-powershell -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\lmlight\stop.ps1"
+lmlight start   # 起動
+lmlight stop    # 停止
 ```
+
+※ 詳細は [run.md](run.md) を参照
 
 ## アクセス
 
@@ -170,7 +157,7 @@ powershell -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\lmlight\stop.ps1"
 **macOS:**
 ```bash
 rm -rf ~/.local/lmlight
-rm -rf "/Applications/LM Light.app"
+sudo rm -f /usr/local/bin/lmlight
 ```
 
 **Linux:**

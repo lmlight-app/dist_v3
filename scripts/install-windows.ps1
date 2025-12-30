@@ -538,38 +538,25 @@ if ($MISSING_DEPS.Count -gt 0) {
     Write-Host ""
 }
 
-# Create Start Menu shortcuts (path is consistent across all locales)
-$START_MENU = [Environment]::GetFolderPath("Programs")
-$APP_FOLDER = "$START_MENU\LM Light"
-New-Item -ItemType Directory -Force -Path $APP_FOLDER | Out-Null
+# Create lmlight.bat CLI
+$BAT_CONTENT = @"
+@echo off
+if "%1"=="start" powershell -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\lmlight\start.ps1"
+if "%1"=="stop" powershell -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\lmlight\stop.ps1"
+if "%1"=="" echo Usage: lmlight {start^|stop}
+"@
+Set-Content -Path "$INSTALL_DIR\lmlight.bat" -Value $BAT_CONTENT -Encoding ASCII
 
-$WshShell = New-Object -ComObject WScript.Shell
+# Add to PATH if not already present
+$UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($UserPath -notlike "*$INSTALL_DIR*") {
+    [Environment]::SetEnvironmentVariable("Path", "$UserPath;$INSTALL_DIR", "User")
+    Write-Success "PATH に追加しました（新しいターミナルで有効）"
+}
 
-# メインのトグルショートカット（タスクバーにピン留め用）
-$ToggleShortcut = $WshShell.CreateShortcut("$APP_FOLDER\LM Light.lnk")
-$ToggleShortcut.TargetPath = "powershell.exe"
-$ToggleShortcut.Arguments = "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$INSTALL_DIR\toggle.ps1`""
-$ToggleShortcut.WorkingDirectory = $INSTALL_DIR
-$ToggleShortcut.Description = "Toggle LM Light (Start/Stop)"
-$ToggleShortcut.Save()
-
-$StartShortcut = $WshShell.CreateShortcut("$APP_FOLDER\LM Light Start.lnk")
-$StartShortcut.TargetPath = "powershell.exe"
-$StartShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$INSTALL_DIR\start.ps1`""
-$StartShortcut.WorkingDirectory = $INSTALL_DIR
-$StartShortcut.Description = "Start LM Light"
-$StartShortcut.Save()
-
-$StopShortcut = $WshShell.CreateShortcut("$APP_FOLDER\LM Light Stop.lnk")
-$StopShortcut.TargetPath = "powershell.exe"
-$StopShortcut.Arguments = "-ExecutionPolicy Bypass -File `"$INSTALL_DIR\stop.ps1`""
-$StopShortcut.WorkingDirectory = $INSTALL_DIR
-$StopShortcut.Description = "Stop LM Light"
-$StopShortcut.Save()
-
-Write-Success "スタートメニューにショートカットを作成しました"
-Write-Host "  タスクバーにピン留め: スタートメニュー → LM Light → 右クリック → タスクバーにピン留め" -ForegroundColor Cyan
-
+Write-Host "起動: lmlight start" -ForegroundColor Blue
+Write-Host "停止: lmlight stop" -ForegroundColor Blue
+Write-Host "  または" -ForegroundColor Gray
 Write-Host "起動: powershell -ExecutionPolicy Bypass -File `"$INSTALL_DIR\start.ps1`"" -ForegroundColor Blue
 Write-Host "停止: powershell -ExecutionPolicy Bypass -File `"$INSTALL_DIR\stop.ps1`"" -ForegroundColor Blue
 Write-Host ""

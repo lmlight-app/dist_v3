@@ -4,42 +4,42 @@
 
 ## セットアップ
 
-### macOS / Linux
+### macOS
 
 ```bash
-# シンボリックリンクを作成
+# シンボリックリンクを作成（インストール時に自動実行）
+sudo ln -sf ~/.local/lmlight/lmlight /usr/local/bin/lmlight
+```
+
+または `.zshrc` に追加:
+
+```bash
+echo 'alias lmlight="~/.local/lmlight/lmlight"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Linux
+
+```bash
+# シンボリックリンクを作成（インストール時に自動実行）
 sudo ln -sf ~/.local/lmlight/lmlight /usr/local/bin/lmlight
 ```
 
 または `.bashrc` / `.zshrc` に追加:
 
 ```bash
-alias lmlight='~/.local/lmlight/lmlight'
+echo 'alias lmlight="~/.local/lmlight/lmlight"' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 ### Windows
 
-PowerShell プロファイルに追加:
+インストール時に `%LOCALAPPDATA%\lmlight\lmlight.bat` が作成され、PATH に追加されます。
+
+手動で設定する場合:
 
 ```powershell
-# プロファイルを開く
-notepad $PROFILE
-
-# 以下を追加
-function lmlight {
-    param([string]$cmd)
-    switch ($cmd) {
-        "start" { & "$env:LOCALAPPDATA\lmlight\start.ps1" }
-        "stop"  { & "$env:LOCALAPPDATA\lmlight\stop.ps1" }
-        default { Write-Host "Usage: lmlight {start|stop}" }
-    }
-}
-```
-
-または PATH に追加:
-
-```powershell
-# バッチファイルを作成
+# lmlight.bat を作成
 @"
 @echo off
 if "%1"=="start" powershell -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\lmlight\start.ps1"
@@ -47,7 +47,7 @@ if "%1"=="stop" powershell -ExecutionPolicy Bypass -File "%LOCALAPPDATA%\lmlight
 if "%1"=="" echo Usage: lmlight {start^|stop}
 "@ | Out-File -Encoding ASCII "$env:LOCALAPPDATA\lmlight\lmlight.bat"
 
-# PATH に追加
+# PATH に追加（新しいターミナルで有効）
 [Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:LOCALAPPDATA\lmlight", "User")
 ```
 
