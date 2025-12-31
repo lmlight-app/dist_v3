@@ -411,13 +411,12 @@ Start-Sleep -Seconds 1
 
 # API 起動
 Write-Host "API を起動中..."
-Start-Process -FilePath "$PROJECT_ROOT\bin\lmlight-api.exe" -WorkingDirectory $PROJECT_ROOT -WindowStyle Hidden -RedirectStandardOutput "$PROJECT_ROOT\logs\api.log" -RedirectStandardError "$PROJECT_ROOT\logs\api.err"
+$apiProcess = Start-Process -FilePath "$PROJECT_ROOT\bin\lmlight-api.exe" -WorkingDirectory $PROJECT_ROOT -PassThru
 Start-Sleep -Seconds 3
 
 # Web 起動
 Write-Host "Web を起動中..."
-Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$PROJECT_ROOT\web" -WindowStyle Hidden -RedirectStandardOutput "$PROJECT_ROOT\logs\web.log" -RedirectStandardError "$PROJECT_ROOT\logs\web.err"
-Start-Sleep -Seconds 3
+$webProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$PROJECT_ROOT\web" -PassThru
 
 Write-Host ""
 Write-Host "LM Light が起動しました！" -ForegroundColor Green
@@ -427,9 +426,23 @@ Write-Host "  API:    http://localhost:8000"
 Write-Host ""
 Write-Host "  ログイン: admin@local / admin123"
 Write-Host ""
+Write-Host "  Ctrl+C で停止" -ForegroundColor Yellow
+Write-Host ""
 
-# ブラウザを開く
-Start-Process "http://localhost:3000"
+# Ctrl+C ハンドラー
+$null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+    Stop-Process -Id $apiProcess.Id -Force -ErrorAction SilentlyContinue
+    Stop-Process -Id $webProcess.Id -Force -ErrorAction SilentlyContinue
+}
+
+try {
+    # プロセス終了まで待機
+    Wait-Process -Id $apiProcess.Id, $webProcess.Id -ErrorAction SilentlyContinue
+} finally {
+    Write-Host "Stopped"
+    Stop-Process -Id $apiProcess.Id -Force -ErrorAction SilentlyContinue
+    Stop-Process -Id $webProcess.Id -Force -ErrorAction SilentlyContinue
+}
 '@
 
 Set-Content -Path "$INSTALL_DIR\scripts\start.ps1" -Value $START_SCRIPT -Encoding UTF8
@@ -551,9 +564,12 @@ Set-Content -Path "$INSTALL_DIR\lmlight.bat" -Value $BAT_CONTENT -Encoding ASCII
 $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if ($UserPath -notlike "*$INSTALL_DIR*") {
     [Environment]::SetEnvironmentVariable("Path", "$UserPath;$INSTALL_DIR", "User")
-    Write-Success "PATH に追加しました（新しいターミナルで有効）"
+    Write-Success "PATH に追加しました"
 }
 
+Write-Host ""
+Write-Warn "lmlight コマンドを使うには新しいターミナルを開いてください"
+Write-Host ""
 Write-Host "起動: lmlight start" -ForegroundColor Blue
 Write-Host "停止: lmlight stop" -ForegroundColor Blue
 Write-Host "  または" -ForegroundColor Gray
