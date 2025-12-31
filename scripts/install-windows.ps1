@@ -48,8 +48,11 @@ if (Test-Path "$INSTALL_DIR\bin\lmlight-api.exe") {
     # 既存プロセス停止
     Write-Info "既存のプロセスを停止中..."
     Get-Process -Name "lmlight-api" -ErrorAction SilentlyContinue | Stop-Process -Force
-    Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*lmlight*" } | Stop-Process -Force
-    Start-Sleep -Seconds 1
+    # lmlightフォルダで動作しているnodeのみ停止
+    Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -like "*lmlight*" } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Start-Sleep -Seconds 2
     Write-Success "既存のプロセスを停止しました"
 }
 
@@ -116,10 +119,10 @@ if (Get-Command ollama -ErrorAction SilentlyContinue) {
 }
 
 # Tesseract OCR チェック (オプション: 画像OCR用)
-if (Get-Command tesseract -ErrorAction SilentlyContinue) {
+if ((Get-Command tesseract -ErrorAction SilentlyContinue) -or (Test-Path "C:\Program Files\Tesseract-OCR\tesseract.exe")) {
     Write-Success "Tesseract OCR が見つかりました (画像OCR用)"
 } else {
-    Write-Warn "Tesseract OCR が見つかりません (オプション: 画像OCR用)"
+    Write-Warn "Tesseract OCR 未接続 (オプション: 画像OCR用)"
     $MISSING_DEPS += "tesseract"
 }
 
@@ -352,19 +355,21 @@ if (Get-Command ollama -ErrorAction SilentlyContinue) {
 # ============================================================
 Write-Info "ステップ 5/5: 設定を作成中..."
 
-# .env ファイル作成
-$NEXTAUTH_SECRET = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
-$ENV_CONTENT = @"
+# .env ファイル作成 (存在しない場合のみ)
+if (-not (Test-Path "$INSTALL_DIR\.env")) {
+    $ENV_CONTENT = @"
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}
 OLLAMA_BASE_URL=http://localhost:11434
 LICENSE_FILE_PATH=$INSTALL_DIR\license.lic
-NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+NEXTAUTH_SECRET=randomsecret123
 NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 "@
-
-Set-Content -Path "$INSTALL_DIR\.env" -Value $ENV_CONTENT -Encoding UTF8
-Write-Success ".env ファイルを作成しました"
+    Set-Content -Path "$INSTALL_DIR\.env" -Value $ENV_CONTENT -Encoding UTF8
+    Write-Success ".env ファイルを作成しました"
+} else {
+    Write-Info ".env ファイルは既存のため、スキップしました"
+}
 
 # 起動スクリプト作成
 $START_SCRIPT = @'
@@ -411,12 +416,12 @@ Start-Sleep -Seconds 1
 
 # API 起動
 Write-Host "API を起動中..."
-$apiProcess = Start-Process -FilePath "$PROJECT_ROOT\bin\lmlight-api.exe" -WorkingDirectory $PROJECT_ROOT -PassThru
+$apiProcess = Start-Process -FilePath "$PROJECT_ROOT\bin\lmlight-api.exe" -WorkingDirectory $PROJECT_ROOT -NoNewWindow -PassThru
 Start-Sleep -Seconds 3
 
 # Web 起動
 Write-Host "Web を起動中..."
-$webProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$PROJECT_ROOT\web" -PassThru
+$webProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$PROJECT_ROOT\web" -NoNewWindow -PassThru
 
 Write-Host ""
 Write-Host "LM Light が起動しました！" -ForegroundColor Green
