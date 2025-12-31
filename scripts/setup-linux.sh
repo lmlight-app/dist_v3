@@ -23,7 +23,4 @@ sleep 2
 $SUDO -u postgres psql -c "CREATE USER lmlight WITH PASSWORD 'lmlight';" 2>/dev/null || true
 $SUDO -u postgres psql -c "CREATE DATABASE lmlight OWNER lmlight;" 2>/dev/null || true
 
-# Download model
-ollama pull gemma3:4b 2>/dev/null || true
-
 echo "Done. Run install-linux.sh next."

@@ -335,19 +335,6 @@ if (Get-Command ollama -ErrorAction SilentlyContinue) {
         Start-Sleep -Seconds 3
     }
 
-    # モデルダウンロード
-    $MODELS = @("gemma3:4b", "nomic-embed-text")
-    foreach ($model in $MODELS) {
-        $hasModel = ollama list 2>$null | Select-String $model
-        if ($hasModel) {
-            Write-Success "$model はインストール済みです"
-        } else {
-            Write-Info "$model をダウンロード中..."
-            ollama pull $model
-        }
-    }
-} else {
-    Write-Warn "Ollama がインストールされていないため、モデルダウンロードをスキップしました"
 }
 
 # ============================================================

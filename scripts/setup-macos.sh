@@ -20,7 +20,4 @@ sleep 2
 psql -d postgres -c "CREATE USER lmlight WITH PASSWORD 'lmlight';" 2>/dev/null || true
 psql -d postgres -c "CREATE DATABASE lmlight OWNER lmlight;" 2>/dev/null || true
 
-# Download model
-ollama pull gemma3:4b 2>/dev/null || true
-
 echo "Done. Run install-macos.sh next."
