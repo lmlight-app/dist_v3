@@ -143,7 +143,10 @@ if ($MISSING_DEPS.Count -gt 0 -and $isAdmin) {
                 }
                 "ollama" {
                     Write-Info "Ollama をインストール中..."
-                    winget install -e --id Ollama.Ollama --silent --accept-package-agreements --accept-source-agreements
+                    $null = winget install -e --id Ollama.Ollama --silent --accept-package-agreements --accept-source-agreements 2>&1
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Success "Ollama をインストールしました"
+                    }
                 }
                 "tesseract" {
                     Write-Info "Tesseract OCR をインストール中..."
@@ -207,6 +210,7 @@ CREATE TABLE IF NOT EXISTS "UserSettings" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL UNIQUE,
     "defaultModel" TEXT,
+    "customPrompt" TEXT,
     "historyLimit" INTEGER NOT NULL DEFAULT 2,
     "temperature" DOUBLE PRECISION NOT NULL DEFAULT 0.7,
     "maxTokens" INTEGER NOT NULL DEFAULT 2048,

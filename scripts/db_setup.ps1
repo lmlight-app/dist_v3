@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS "UserSettings" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL UNIQUE,
     "defaultModel" TEXT,
+    "customPrompt" TEXT,
     "historyLimit" INTEGER NOT NULL DEFAULT 2,
     "temperature" DOUBLE PRECISION NOT NULL DEFAULT 0.7,
     "maxTokens" INTEGER NOT NULL DEFAULT 2048,
