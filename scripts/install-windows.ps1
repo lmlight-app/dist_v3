@@ -388,6 +388,19 @@ if (Test-Path "$PROJECT_ROOT\.env") {
     }
 }
 
+# FFmpeg PATH 設定 (文字起こし用・オプション)
+if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+    @(
+        "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-*-full_build\bin",
+        "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-*\bin",
+        "C:\ProgramData\chocolatey\lib\ffmpeg\tools\ffmpeg\bin",
+        "$env:USERPROFILE\scoop\apps\ffmpeg\current\bin"
+    ) | ForEach-Object {
+        $p = Resolve-Path -Path $_ -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($p -and (Test-Path "$($p.Path)\ffmpeg.exe")) { $env:PATH = "$($p.Path);$env:PATH"; return }
+    }
+}
+
 Write-Host "LM Light を起動中..." -ForegroundColor Blue
 
 # PostgreSQL チェック

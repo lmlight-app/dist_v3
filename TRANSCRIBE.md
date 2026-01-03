@@ -4,8 +4,8 @@
 
 ## モデル比較表
 
-| モデル | サイズ | 30分音声の処理時間 (CPU) | 30分音声の処理時間 (RTX 5060) | 精度 | 想定用途 |
-|--------|--------|--------------------------|-------------------------------|------|----------|
+| モデル | サイズ | 30分音声の処理時間 (CPU) | 30分音声の処理時間 (GPU) | 精度 | 想定用途 |
+|--------|--------|--------------------------|--------------------------|------|----------|
 | tiny | 74MB | 約3分 | 約30秒 | ★★☆☆☆ | 高速プレビュー、メモ程度 |
 | base | 142MB | 約5分 | 約45秒 | ★★★☆☆ | 日常会話、簡易議事録 |
 | small | 466MB | 約15分 | 約1.5分 | ★★★★☆ | ビジネス文書、インタビュー |
@@ -14,6 +14,39 @@
 
 ※ 処理時間は目安です。実際の時間はCPU/GPU性能、音声品質により変動します。
 ※ GPU未使用時はCPUのみで処理されます。
+
+## GPU対応状況
+
+| GPU | macOS | Linux | Windows |
+|-----|-------|-------|---------|
+| Apple Silicon (M1/M2/M3/M4) | ✅ Metal | - | - |
+| NVIDIA RTX 20/30/40シリーズ | - | ✅ CUDA | ✅ CUDA |
+| NVIDIA RTX 50シリーズ | - | ⚠️ | ⚠️ |
+
+⚠️ RTX 50シリーズ (Blackwell) は現在pywhispercppがプリビルドバイナリ未対応のため、CPU処理にフォールバックします。
+
+### RTX 50シリーズでGPUを使う方法
+
+pywhispercppをソースからビルドすることでGPUを有効化できます。
+
+**前提条件:**
+- CUDA Toolkit 12.8以上
+- Visual Studio 2022 (C++ビルドツール)
+
+**Windowsでのビルド:**
+```powershell
+# 1. pywhispercppをCUDA有効でインストール
+$env:GGML_CUDA = "1"
+$env:CMAKE_CUDA_ARCHITECTURES = "120"  # Blackwell
+pip install git+https://github.com/absadiki/pywhispercpp --force-reinstall --no-cache-dir
+```
+
+**Linux/macOSでのビルド:**
+```bash
+GGML_CUDA=1 CMAKE_CUDA_ARCHITECTURES=120 pip install git+https://github.com/absadiki/pywhispercpp --force-reinstall --no-cache-dir
+```
+
+※ ビルドに失敗する場合は `CMAKE_CUDA_ARCHITECTURES=90` を試してください
 
 ## モデルのインストール
 
