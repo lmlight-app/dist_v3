@@ -112,57 +112,17 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 
 ### 文字起こし機能 (オプション)
 
-音声ファイルをテキストに変換する機能です。モデルは別途インストールが必要です。
-
-#### モデル比較表
-
-| モデル | サイズ | 30分音声の処理時間 (CPU) | 30分音声の処理時間 (RTX 5060) | 精度 | 想定用途 |
-|--------|--------|--------------------------|-------------------------------|------|----------|
-| tiny | 74MB | 約3分 | 約30秒 | ★★☆☆☆ | 高速プレビュー、メモ程度 |
-| base | 142MB | 約5分 | 約45秒 | ★★★☆☆ | 日常会話、簡易議事録 |
-| small | 466MB | 約15分 | 約1.5分 | ★★★★☆ | ビジネス文書、インタビュー |
-| medium | 1.5GB | 約40分 | 約3分 | ★★★★☆ | 専門用語含む録音 |
-| large | 2.9GB | 約90分 | 約5分 | ★★★★★ | 高精度が必須の文書化 |
-
-※ 処理時間は目安です。実際の時間はCPU/GPU性能、音声品質により変動します。
-※ GPU未使用時はCPUのみで処理されます。
-
-#### モデルのインストール
-
-**macOS / Linux:**
+音声ファイルをテキストに変換する機能です。詳細は [TRANSCRIBE.md](TRANSCRIBE.md) を参照。
 
 ```bash
-# デフォルト (tiny)
+# macOS / Linux
 curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash
-
-# モデル指定
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- tiny
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- base
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- small
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- medium
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- large
 ```
-
-**Windows:**
 
 ```powershell
-# デフォルト (tiny)
+# Windows
 irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.ps1 | iex
-
-# モデル指定
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.ps1))) -ModelName tiny
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.ps1))) -ModelName base
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.ps1))) -ModelName small
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.ps1))) -ModelName medium
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.ps1))) -ModelName large
 ```
-
-インストール後、LM Lightを再起動するとサイドバーに「文字起こし」が表示されます。
-
-- 対応形式: WAV, MP3, M4A, WebM, OGG, FLAC, AAC
-- 最大ファイルサイズ: 100MB
-- 対応言語: 日本語, English
-- GPU対応: Metal (macOS), CUDA (Linux/Windows)
 
 ### ライセンス (Perpetual License)
 

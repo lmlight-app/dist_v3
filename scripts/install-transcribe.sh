@@ -8,13 +8,17 @@ INSTALL_DIR="${HOME}/.local/lmlight"
 MODEL_DIR="${INSTALL_DIR}/models/whisper"
 ENV_FILE="${INSTALL_DIR}/.env"
 
-# Model definitions
-declare -A MODEL_SIZES
-MODEL_SIZES[tiny]="74MB"
-MODEL_SIZES[base]="142MB"
-MODEL_SIZES[small]="466MB"
-MODEL_SIZES[medium]="1.5GB"
-MODEL_SIZES[large]="2.9GB"
+# Get model size (bash 3.2 compatible - no associative arrays)
+get_model_size() {
+    case "$1" in
+        tiny)   echo "74MB" ;;
+        base)   echo "142MB" ;;
+        small)  echo "466MB" ;;
+        medium) echo "1.5GB" ;;
+        large)  echo "2.9GB" ;;
+        *)      echo "unknown" ;;
+    esac
+}
 
 show_usage() {
     echo "使用方法: $0 [モデル名]"
@@ -53,7 +57,7 @@ else
     MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${MODEL_NAME}.bin"
     MODEL_FILE="${MODEL_DIR}/ggml-${MODEL_NAME}.bin"
 fi
-MODEL_SIZE="${MODEL_SIZES[$MODEL_NAME]}"
+MODEL_SIZE="$(get_model_size "$MODEL_NAME")"
 
 echo "=========================================="
 echo "  LM Light 文字起こしモデル インストーラー"
