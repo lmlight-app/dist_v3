@@ -1,17 +1,65 @@
 #!/bin/bash
 # LM Light - Transcription Model Installer
-# Downloads Whisper tiny model for speech-to-text functionality
+# Downloads Whisper model for speech-to-text functionality
 
 set -e
 
-MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin"
 INSTALL_DIR="${HOME}/.local/lmlight"
 MODEL_DIR="${INSTALL_DIR}/models/whisper"
-MODEL_FILE="${MODEL_DIR}/ggml-tiny.bin"
+ENV_FILE="${INSTALL_DIR}/.env"
+
+# Model definitions
+declare -A MODEL_SIZES
+MODEL_SIZES[tiny]="74MB"
+MODEL_SIZES[base]="142MB"
+MODEL_SIZES[small]="466MB"
+MODEL_SIZES[medium]="1.5GB"
+MODEL_SIZES[large]="2.9GB"
+
+show_usage() {
+    echo "使用方法: $0 [モデル名]"
+    echo ""
+    echo "モデル一覧:"
+    echo "  tiny   - 74MB  (デフォルト、軽量・高速)"
+    echo "  base   - 142MB (バランス型)"
+    echo "  small  - 466MB (高精度)"
+    echo "  medium - 1.5GB (高精度・GPU推奨)"
+    echo "  large  - 2.9GB (最高精度・GPU必須)"
+    echo ""
+    echo "例:"
+    echo "  $0           # tinyモデルをインストール"
+    echo "  $0 small     # smallモデルをインストール"
+    echo ""
+    echo "リモート実行:"
+    echo "  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- small"
+}
+
+# Parse arguments
+MODEL_NAME="${1:-tiny}"
+
+# Validate model name
+if [[ ! " tiny base small medium large " =~ " ${MODEL_NAME} " ]]; then
+    echo "❌ 無効なモデル名: $MODEL_NAME"
+    echo ""
+    show_usage
+    exit 1
+fi
+
+# large uses v3 version
+if [ "$MODEL_NAME" = "large" ]; then
+    MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin"
+    MODEL_FILE="${MODEL_DIR}/ggml-large-v3.bin"
+else
+    MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${MODEL_NAME}.bin"
+    MODEL_FILE="${MODEL_DIR}/ggml-${MODEL_NAME}.bin"
+fi
+MODEL_SIZE="${MODEL_SIZES[$MODEL_NAME]}"
 
 echo "=========================================="
 echo "  LM Light 文字起こしモデル インストーラー"
 echo "=========================================="
+echo ""
+echo "選択モデル: ${MODEL_NAME} (${MODEL_SIZE})"
 echo ""
 
 # Check if already installed
@@ -30,14 +78,20 @@ if [ ! -d "$INSTALL_DIR" ]; then
     exit 1
 fi
 
+# Remove old model files (different model)
+if [ -d "$MODEL_DIR" ]; then
+    echo "📁 既存のモデルを削除..."
+    rm -rf "$MODEL_DIR"
+fi
+
 # Create model directory
 echo "📁 モデルディレクトリを作成: $MODEL_DIR"
 mkdir -p "$MODEL_DIR"
 
 # Download model
-echo "📥 Whisper tinyモデルをダウンロード中..."
+echo "📥 Whisper ${MODEL_NAME}モデルをダウンロード中..."
 echo "   URL: $MODEL_URL"
-echo "   サイズ: 約74MB"
+echo "   サイズ: 約${MODEL_SIZE}"
 echo ""
 
 if command -v curl &> /dev/null; then
@@ -49,11 +103,23 @@ else
     exit 1
 fi
 
+# Update .env WHISPER_MODEL
+if [ -f "$ENV_FILE" ]; then
+    if grep -q "^WHISPER_MODEL=" "$ENV_FILE"; then
+        sed -i.bak "s/^WHISPER_MODEL=.*/WHISPER_MODEL=${MODEL_NAME}/" "$ENV_FILE"
+        rm -f "${ENV_FILE}.bak"
+    else
+        echo "WHISPER_MODEL=${MODEL_NAME}" >> "$ENV_FILE"
+    fi
+    echo "📝 .envを更新: WHISPER_MODEL=${MODEL_NAME}"
+fi
+
 # Verify download
 if [ -f "$MODEL_FILE" ]; then
     SIZE=$(ls -lh "$MODEL_FILE" | awk '{print $5}')
     echo ""
     echo "✅ インストール完了!"
+    echo "   モデル: ${MODEL_NAME}"
     echo "   ファイル: $MODEL_FILE"
     echo "   サイズ: $SIZE"
     echo ""
