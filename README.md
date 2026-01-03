@@ -54,6 +54,7 @@ docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
 | PostgreSQL 16+ | `brew install postgresql@16` | `sudo apt install postgresql` | `winget install PostgreSQL.PostgreSQL` |
 | pgvector | `brew install pgvector` | `sudo apt install postgresql-16-pgvector` | [手動インストール](https://github.com/pgvector/pgvector#windows) |
 | Ollama | `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` | `winget install Ollama.Ollama` |
+| FFmpeg (文字起こし用) | `brew install ffmpeg` | `sudo apt install ffmpeg` | `winget install Gyan.FFmpeg` |
 | Tesseract OCR (任意) | `brew install tesseract` | `sudo apt install tesseract-ocr` | `winget install UB-Mannheim.TesseractOCR` |
 
 ### データベース
@@ -105,8 +106,33 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 | `NEXT_PUBLIC_API_URL` | APIサーバーURL | `http://localhost:8000` |
 | `API_PORT` | APIポート | `8000` |
 | `WEB_PORT` | Webポート | `3000` |
+| `WHISPER_MODEL` | 文字起こしモデル (tiny/small/medium/large) | `tiny` |
 
 ※ インストーラーが自動設定します。手動変更が必要な場合のみ編集してください。
+
+### 文字起こし機能 (オプション)
+
+音声ファイルをテキストに変換する機能です。モデルは別途インストールが必要です。
+
+**モデルのインストール:**
+
+```bash
+# macOS/Linux
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash
+```
+
+```powershell
+# Windows
+irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.ps1 | iex
+```
+
+インストール後、LM Lightを再起動するとサイドバーに「文字起こし」が表示されます。
+
+- 対応形式: WAV, MP3, M4A, WebM, OGG, FLAC, AAC
+- 最大ファイルサイズ: 100MB
+- 対応言語: 日本語, English
+- GPU対応: Metal (macOS), CUDA (Linux/Windows)
+- モデルサイズ: 約74MB (Whisper tiny)
 
 ### ライセンス (Perpetual License)
 
@@ -175,13 +201,14 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 
 ```
 ~/.local/lmlight/
-├── api             # APIバイナリ (lmlight-perpetual-*)
-├── web/            # Webフロントエンド
-├── .env            # 設定ファイル
-├── license.lic     # ライセンス (Hardware UUIDベース)
-├── start.sh        # 起動
-├── stop.sh         # 停止
-└── logs/           # ログ
+├── api                    # APIバイナリ (lmlight-perpetual-*)
+├── web/                   # Webフロントエンド
+├── models/whisper/        # 文字起こしモデル (オプション)
+├── .env                   # 設定ファイル
+├── license.lic            # ライセンス (Hardware UUIDベース)
+├── start.sh               # 起動
+├── stop.sh                # 停止
+└── logs/                  # ログ
 ```
 
 ## ライセンス比較
