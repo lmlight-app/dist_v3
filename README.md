@@ -51,8 +51,8 @@ docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
 | 依存関係 | macOS | Linux (Ubuntu/Debian) | Windows |
 |---------|-------|----------------------|---------|
 | Node.js 18+ | `brew install node` | `sudo apt install nodejs npm` | `winget install OpenJS.NodeJS.LTS` |
-| PostgreSQL 16+ | `brew install postgresql@16` | `sudo apt install postgresql` | `winget install PostgreSQL.PostgreSQL` |
-| pgvector | `brew install pgvector` | `sudo apt install postgresql-16-pgvector` | [手動インストール](https://github.com/pgvector/pgvector#windows) |
+| PostgreSQL 17 | `brew install postgresql@17` | `sudo apt install postgresql` | `winget install PostgreSQL.PostgreSQL.17` |
+| pgvector | `brew install pgvector` | `sudo apt install postgresql-17-pgvector` | [手動インストール](https://github.com/pgvector/pgvector#windows) |
 | Ollama | `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` | `winget install Ollama.Ollama` |
 | FFmpeg (文字起こし用) | `brew install ffmpeg` | `sudo apt install ffmpeg` | `winget install Gyan.FFmpeg` |
 | Tesseract OCR (任意) | `brew install tesseract` | `sudo apt install tesseract-ocr` | `winget install UB-Mannheim.TesseractOCR` |
