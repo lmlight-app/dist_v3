@@ -18,17 +18,17 @@ non-transferable right to use the Software ONLY if you have purchased a valid
 license from Digital Base Co., Ltd.
 
 ================================================================================
-SINGLE USER / SINGLE DEVICE RESTRICTION
+LICENSE RESTRICTION
 ================================================================================
 
-* ONE LICENSE = ONE USER = ONE DEVICE
+* ONE LICENSE = ONE DEVICE
 
-This license permits use by a single individual user on a single device only.
-The license key is bound to a specific device (MAC address) upon activation.
+This license permits use on a single device only.
 
-- Multiple users sharing a single license is PROHIBITED
+- Perpetual License: Bound to a specific device (MAC address) upon activation
+- Subscription License: No device binding (valid during subscription period only)
 - Using the same license on multiple devices is PROHIBITED
-- Organizations requiring multiple users must purchase multiple licenses
+- If you need to use on multiple devices, purchase licenses for each device
 
 ================================================================================
 RESALE AND REDISTRIBUTION PROHIBITION
