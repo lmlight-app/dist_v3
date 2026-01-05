@@ -107,10 +107,10 @@ All rights reserved.
 ## お問い合わせ
 
 ライセンスの購入およびお問い合わせ：
-https://digital-base.co.jp/services/localllm/lmlight-purchase
+https://lmlight.jp/lmlight-purchase
 
 サポート：
-https://digital-base.co.jp/services/localllm/support
+https://lmlight.jp
 
 ---
 
