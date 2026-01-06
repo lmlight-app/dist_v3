@@ -97,13 +97,9 @@ CREATE TABLE IF NOT EXISTS "UserSettings" (
     "ragTopK" INTEGER NOT NULL DEFAULT 5,
     "ragMinSimilarity" DOUBLE PRECISION NOT NULL DEFAULT 0.45,
     "embeddingModel" TEXT NOT NULL DEFAULT 'embeddinggemma:latest',
-    "chunkSize" INTEGER NOT NULL DEFAULT 600,
+    "chunkSize" INTEGER NOT NULL DEFAULT 500,
     "chunkOverlap" INTEGER NOT NULL DEFAULT 100,
-    "chatRagTopK" INTEGER NOT NULL DEFAULT 5,
-    "chatRagMinSimilarity" DOUBLE PRECISION NOT NULL DEFAULT 0.45,
-    "chatEmbeddingModel" TEXT NOT NULL DEFAULT 'embeddinggemma:latest',
-    "chatChunkSize" INTEGER NOT NULL DEFAULT 500,
-    "chatChunkOverlap" INTEGER NOT NULL DEFAULT 100,
+    "visionModel" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
