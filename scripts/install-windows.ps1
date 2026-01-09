@@ -162,6 +162,9 @@ if ($MISSING_DEPS.Count -gt 0 -and $isAdmin) {
 # ============================================================
 Write-Info "ステップ 3/5: PostgreSQL をセットアップ中..."
 
+# PostgreSQL ポート検出
+$DB_PORT = "5432"
+
 if (Get-Command psql -ErrorAction SilentlyContinue) {
     Write-Info "データベースを作成中..."
 
@@ -172,14 +175,28 @@ if (Get-Command psql -ErrorAction SilentlyContinue) {
         Start-Sleep -Seconds 3
     }
 
-    # データベースとユーザー作成
+    # ポート検出: 5432 → 5433 の順で試行
     $env:PGPASSWORD = "postgres"
-    psql -U postgres -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';" 2>$null
-    psql -U postgres -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;" 2>$null
-    psql -U postgres -c "ALTER USER $DB_USER CREATEDB;" 2>$null
+    $ErrorActionPreference = "Continue"
+    $null = psql -U postgres -p 5432 -c "SELECT 1" 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        $null = psql -U postgres -p 5433 -c "SELECT 1" 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $DB_PORT = "5433"
+            Write-Info "PostgreSQL ポート: 5433"
+        }
+    } else {
+        Write-Info "PostgreSQL ポート: 5432"
+    }
+    # データベースとユーザー作成 (エラーは無視)
+    $null = psql -U postgres -p $DB_PORT -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';" 2>$null
+    $null = psql -U postgres -p $DB_PORT -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;" 2>$null
+    $null = psql -U postgres -p $DB_PORT -c "ALTER USER $DB_USER CREATEDB;" 2>$null
 
     # pgvector拡張
-    psql -U postgres -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>$null
+    $null = psql -U postgres -p $DB_PORT -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>$null
+
+    $ErrorActionPreference = "Stop"
 
     # マイグレーション実行
     Write-Info "データベースマイグレーションを実行中..."
@@ -322,7 +339,9 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pgvector TO $DB_USER;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pgvector TO $DB_USER;
 "@
 
-    $SQL_MIGRATION | psql -q -U postgres -d $DB_NAME 2>$null
+    $ErrorActionPreference = "Continue"
+    $null = $SQL_MIGRATION | psql -q -U postgres -p $DB_PORT -d $DB_NAME 2>$null
+    $ErrorActionPreference = "Stop"
     Write-Success "データベースマイグレーションが完了しました"
 } else {
     Write-Warn "PostgreSQL がインストールされていないため、データベースセットアップをスキップしました"
@@ -352,12 +371,16 @@ Write-Info "ステップ 5/5: 設定を作成中..."
 # .env ファイル作成 (存在しない場合のみ)
 if (-not (Test-Path "$INSTALL_DIR\.env")) {
     $ENV_CONTENT = @"
-DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}
+DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}
 OLLAMA_BASE_URL=http://localhost:11434
 LICENSE_FILE_PATH=$INSTALL_DIR\license.lic
 NEXTAUTH_SECRET=randomsecret123
 NEXTAUTH_URL=http://localhost:3000
+AUTH_SECRET=randomsecret123
+AUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
+API_PORT=8000
+WEB_PORT=3000
 "@
     Set-Content -Path "$INSTALL_DIR\.env" -Value $ENV_CONTENT -Encoding UTF8
     Write-Success ".env ファイルを作成しました"
@@ -378,10 +401,21 @@ if (Test-Path "$PROJECT_ROOT\scripts") {
 # .env 読み込み
 if (Test-Path "$PROJECT_ROOT\.env") {
     Get-Content "$PROJECT_ROOT\.env" | ForEach-Object {
-        if ($_ -match "^([^=]+)=(.*)$") {
-            [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+        if ($_ -match "^([^#][^=]+)=(.*)$") {
+            [System.Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim())
         }
     }
+}
+
+# Auth.js v5 対応
+$env:AUTH_SECRET = $env:NEXTAUTH_SECRET
+$env:AUTH_URL = $env:NEXTAUTH_URL
+$env:AUTH_TRUST_HOST = "true"
+
+# Tesseract OCR (画像OCR用)
+if (Test-Path "C:\Program Files\Tesseract-OCR\tesseract.exe") {
+    $env:PATH = "C:\Program Files\Tesseract-OCR;$env:PATH"
+    $env:TESSDATA_PREFIX = "C:\Program Files\Tesseract-OCR\tessdata"
 }
 
 # FFmpeg PATH 設定 (文字起こし用・オプション)
