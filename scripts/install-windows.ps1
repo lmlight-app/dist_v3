@@ -35,19 +35,17 @@ if (-not $isAdmin) {
 }
 
 # ディレクトリ作成
-New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\bin" | Out-Null
+New-Item -ItemType Directory -Force -Path "$INSTALL_DIR" | Out-Null
 New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\web" | Out-Null
-New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\data" | Out-Null
 New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\logs" | Out-Null
-New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\scripts" | Out-Null
 
 # 既存インストールチェック
-if (Test-Path "$INSTALL_DIR\bin\lmlight-api.exe") {
+if (Test-Path "$INSTALL_DIR\api.exe") {
     Write-Info "既存のインストールを検出しました。アップデート中..."
 
     # 既存プロセス停止
     Write-Info "既存のプロセスを停止中..."
-    Get-Process -Name "lmlight-api" -ErrorAction SilentlyContinue | Stop-Process -Force
+    Get-Process -Name "api" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*lmlight*" } | Stop-Process -Force
     # lmlightフォルダで動作しているnodeのみ停止
     Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyContinue |
         Where-Object { $_.CommandLine -like "*lmlight*" } |
@@ -63,7 +61,7 @@ Write-Info "ステップ 1/5: バイナリをダウンロード中..."
 
 Write-Info "バックエンドをダウンロード中..."
 $BACKEND_FILE = "lmlight-perpetual-windows-$ARCH.exe"
-Invoke-WebRequest -Uri "$BASE_URL/$BACKEND_FILE" -OutFile "$INSTALL_DIR\bin\lmlight-api.exe" -UseBasicParsing
+Invoke-WebRequest -Uri "$BASE_URL/$BACKEND_FILE" -OutFile "$INSTALL_DIR\api.exe" -UseBasicParsing
 Write-Success "バックエンドをダウンロードしました"
 
 Write-Info "フロントエンドをダウンロード中..."
@@ -391,16 +389,12 @@ WEB_PORT=3000
 # 起動スクリプト作成
 $START_SCRIPT = @'
 # LM Light 起動スクリプト
-$PROJECT_ROOT = Split-Path -Parent $PSScriptRoot
-if (Test-Path "$PROJECT_ROOT\scripts") {
-    $PROJECT_ROOT = $PROJECT_ROOT
-} else {
-    $PROJECT_ROOT = Split-Path -Parent $PROJECT_ROOT
-}
+$INSTALL_DIR = "$env:LOCALAPPDATA\lmlight"
+Set-Location $INSTALL_DIR
 
 # .env 読み込み
-if (Test-Path "$PROJECT_ROOT\.env") {
-    Get-Content "$PROJECT_ROOT\.env" | ForEach-Object {
+if (Test-Path "$INSTALL_DIR\.env") {
+    Get-Content "$INSTALL_DIR\.env" | ForEach-Object {
         if ($_ -match "^([^#][^=]+)=(.*)$") {
             [System.Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim())
         }
@@ -449,20 +443,20 @@ if (-not (Get-Process -Name "ollama" -ErrorAction SilentlyContinue)) {
 }
 
 # 既存プロセス終了
-Get-Process -Name "lmlight-api" -ErrorAction SilentlyContinue | Stop-Process -Force
-Get-NetTCPConnection -LocalPort 3000, 8000 -ErrorAction SilentlyContinue | ForEach-Object {
-    Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue
-}
+Get-Process -Name "api" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*lmlight*" } | Stop-Process -Force
+Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*lmlight*" } | Stop-Process -Force
 Start-Sleep -Seconds 1
 
 # API 起動
 Write-Host "API を起動中..."
-$apiProcess = Start-Process -FilePath "$PROJECT_ROOT\bin\lmlight-api.exe" -WorkingDirectory $PROJECT_ROOT -NoNewWindow -PassThru
+$apiProcess = Start-Process -FilePath "$INSTALL_DIR\api.exe" -WorkingDirectory $INSTALL_DIR -NoNewWindow -PassThru
 Start-Sleep -Seconds 3
 
 # Web 起動
+$env:PORT = "3000"
+$env:HOSTNAME = "0.0.0.0"
 Write-Host "Web を起動中..."
-$webProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$PROJECT_ROOT\web" -NoNewWindow -PassThru
+$webProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$INSTALL_DIR\web" -NoNewWindow -PassThru
 
 Write-Host ""
 Write-Host "LM Light が起動しました！" -ForegroundColor Green
@@ -491,23 +485,20 @@ try {
 }
 '@
 
-Set-Content -Path "$INSTALL_DIR\scripts\start.ps1" -Value $START_SCRIPT -Encoding UTF8
+Set-Content -Path "$INSTALL_DIR\start.ps1" -Value $START_SCRIPT -Encoding UTF8
 
 # 停止スクリプト作成
 $STOP_SCRIPT = @'
+# LM Light 停止スクリプト
 Write-Host "LM Light を停止中..."
 
-Get-Process -Name "lmlight-api" -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process -Name "api" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*lmlight*" } | Stop-Process -Force
 Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*lmlight*" } | Stop-Process -Force
 
 Write-Host "LM Light を停止しました" -ForegroundColor Green
 '@
 
-Set-Content -Path "$INSTALL_DIR\scripts\stop.ps1" -Value $STOP_SCRIPT -Encoding UTF8
-
-# シンボリックリンク的な起動ファイル
-Copy-Item "$INSTALL_DIR\scripts\start.ps1" "$INSTALL_DIR\start.ps1"
-Copy-Item "$INSTALL_DIR\scripts\stop.ps1" "$INSTALL_DIR\stop.ps1"
+Set-Content -Path "$INSTALL_DIR\stop.ps1" -Value $STOP_SCRIPT -Encoding UTF8
 
 # トグルスクリプト作成（macOSと同様の動作）
 $TOGGLE_SCRIPT = @'
@@ -577,8 +568,7 @@ if ($isRunning) {
 }
 '@
 
-Set-Content -Path "$INSTALL_DIR\scripts\toggle.ps1" -Value $TOGGLE_SCRIPT -Encoding UTF8
-Copy-Item "$INSTALL_DIR\scripts\toggle.ps1" "$INSTALL_DIR\toggle.ps1"
+Set-Content -Path "$INSTALL_DIR\toggle.ps1" -Value $TOGGLE_SCRIPT -Encoding UTF8
 
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════╗" -ForegroundColor Green
