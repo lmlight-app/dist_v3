@@ -23,25 +23,10 @@ rm -f /tmp/lmlight-web.tar.gz
 
 [ ! -f "$INSTALL_DIR/.env" ] && cat > "$INSTALL_DIR/.env" << EOF
 # LM Light Configuration
-
-# PostgreSQL
 DATABASE_URL=postgresql://lmlight:lmlight@localhost:5432/lmlight
-
-# Ollama
 OLLAMA_BASE_URL=http://localhost:11434
-
-# License (absolute path for Nuitka binary)
 LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
-
-# NextAuth
-NEXTAUTH_SECRET=randomsecret123
-NEXTAUTH_URL=http://localhost:3000
-
-# API
-NEXT_PUBLIC_API_URL=http://localhost:8000
 API_PORT=8000
-
-# Web
 WEB_PORT=3000
 EOF
 
