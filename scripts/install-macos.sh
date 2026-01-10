@@ -9,17 +9,17 @@ case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esa
 
 echo "Installing LM Light ($ARCH) to $INSTALL_DIR"
 
-mkdir -p "$INSTALL_DIR"/{web,logs}
+mkdir -p "$INSTALL_DIR"/{app,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
 curl -fSL "$BASE_URL/lmlight-perpetual-macos-$ARCH" -o "$INSTALL_DIR/api"
 chmod +x "$INSTALL_DIR/api"
 
-curl -fSL "$BASE_URL/lmlight-web.tar.gz" -o "/tmp/lmlight-web.tar.gz"
-rm -rf "$INSTALL_DIR/web" && mkdir -p "$INSTALL_DIR/web"
-tar -xzf "/tmp/lmlight-web.tar.gz" -C "$INSTALL_DIR/web"
-rm -f /tmp/lmlight-web.tar.gz
+curl -fSL "$BASE_URL/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
+rm -rf "$INSTALL_DIR/app" && mkdir -p "$INSTALL_DIR/app"
+tar -xzf "/tmp/lmlight-app.tar.gz" -C "$INSTALL_DIR/app"
+rm -f /tmp/lmlight-app.tar.gz
 
 [ ! -f "$INSTALL_DIR/.env" ] && cat > "$INSTALL_DIR/.env" << EOF
 # LM Light Configuration
@@ -216,7 +216,7 @@ echo "🚀 Starting LM Light..."
 API_PID=$!
 
 # Start Web
-cd web && node server.js &
+cd app && node server.js &
 WEB_PID=$!
 
 echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localhost:${WEB_PORT:-3000}"
@@ -234,7 +234,7 @@ pkill -f "lmlight/start\.sh" 2>/dev/null
 sleep 1
 # Clean up any remaining processes
 pkill -f "\./api$" 2>/dev/null
-pkill -f "lmlight/web.*server\.js" 2>/dev/null
+pkill -f "lmlight/app.*server\.js" 2>/dev/null
 echo "Stopped"
 EOF
 chmod +x "$INSTALL_DIR/stop.sh"

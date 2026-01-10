@@ -36,7 +36,7 @@ if (-not $isAdmin) {
 
 # ディレクトリ作成
 New-Item -ItemType Directory -Force -Path "$INSTALL_DIR" | Out-Null
-New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\web" | Out-Null
+New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\app" | Out-Null
 New-Item -ItemType Directory -Force -Path "$INSTALL_DIR\logs" | Out-Null
 
 # 既存インストールチェック
@@ -65,22 +65,22 @@ Invoke-WebRequest -Uri "$BASE_URL/$BACKEND_FILE" -OutFile "$INSTALL_DIR\api.exe"
 Write-Success "バックエンドをダウンロードしました"
 
 Write-Info "フロントエンドをダウンロード中..."
-$TEMP_TAR = "$env:TEMP\lmlight-web.tar.gz"
-Invoke-WebRequest -Uri "$BASE_URL/lmlight-web.tar.gz" -OutFile $TEMP_TAR -UseBasicParsing
+$TEMP_TAR = "$env:TEMP\lmlight-app.tar.gz"
+Invoke-WebRequest -Uri "$BASE_URL/lmlight-app.tar.gz" -OutFile $TEMP_TAR -UseBasicParsing
 
 # tar展開（Windows 10 1803+）
-$WORK_DIR = "$env:TEMP\lmlight-web-$PID"
+$WORK_DIR = "$env:TEMP\lmlight-app-$PID"
 New-Item -ItemType Directory -Force -Path $WORK_DIR | Out-Null
 tar -xzf $TEMP_TAR -C $WORK_DIR
 if ($LASTEXITCODE -ne 0) {
     Write-Error "tar展開に失敗しました (code: $LASTEXITCODE)"
 }
 
-# webディレクトリを置き換え
-if (Test-Path "$INSTALL_DIR\web") {
-    Remove-Item -Recurse -Force "$INSTALL_DIR\web"
+# appディレクトリを置き換え
+if (Test-Path "$INSTALL_DIR\app") {
+    Remove-Item -Recurse -Force "$INSTALL_DIR\app"
 }
-Move-Item -Path $WORK_DIR -Destination "$INSTALL_DIR\web"
+Move-Item -Path $WORK_DIR -Destination "$INSTALL_DIR\app"
 Remove-Item -Force $TEMP_TAR
 
 Write-Success "フロントエンドをダウンロードしました"
@@ -450,7 +450,7 @@ Start-Sleep -Seconds 3
 $env:PORT = "3000"
 $env:HOSTNAME = "0.0.0.0"
 Write-Host "Web を起動中..."
-$webProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$INSTALL_DIR\web" -NoNewWindow -PassThru
+$appProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$INSTALL_DIR\app" -NoNewWindow -PassThru
 
 Write-Host ""
 Write-Host "LM Light が起動しました！" -ForegroundColor Green
@@ -466,16 +466,16 @@ Write-Host ""
 # Ctrl+C ハンドラー
 $null = Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
     Stop-Process -Id $apiProcess.Id -Force -ErrorAction SilentlyContinue
-    Stop-Process -Id $webProcess.Id -Force -ErrorAction SilentlyContinue
+    Stop-Process -Id $appProcess.Id -Force -ErrorAction SilentlyContinue
 }
 
 try {
     # プロセス終了まで待機
-    Wait-Process -Id $apiProcess.Id, $webProcess.Id -ErrorAction SilentlyContinue
+    Wait-Process -Id $apiProcess.Id, $appProcess.Id -ErrorAction SilentlyContinue
 } finally {
     Write-Host "Stopped"
     Stop-Process -Id $apiProcess.Id -Force -ErrorAction SilentlyContinue
-    Stop-Process -Id $webProcess.Id -Force -ErrorAction SilentlyContinue
+    Stop-Process -Id $appProcess.Id -Force -ErrorAction SilentlyContinue
 }
 '@
 

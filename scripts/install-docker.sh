@@ -47,7 +47,7 @@ info "Downloading API image..."
 curl -fsSL "$BASE_URL/lmlight-perpetual-docker.tar.gz" | docker load
 
 info "Downloading Web image..."
-curl -fsSL "$BASE_URL/lmlight-web-docker.tar.gz" | docker load
+curl -fsSL "$BASE_URL/lmlight-app-docker.tar.gz" | docker load
 
 # Create docker-compose.yml
 info "Creating docker-compose.yml..."
@@ -78,8 +78,8 @@ services:
       postgres:
         condition: service_healthy
 
-  web:
-    image: lmlight-web
+  app:
+    image: lmlight-app
     ports:
       - "${WEB_PORT:-3000}:3000"
     env_file: .env
