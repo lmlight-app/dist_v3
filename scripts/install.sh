@@ -13,7 +13,7 @@ case "$OS" in Linux) OS="linux" ;; Darwin) OS="macos" ;; *) echo "Unsupported OS
 
 echo "Installing LM Light ($OS-$ARCH) to $INSTALL_DIR"
 
-mkdir -p "$INSTALL_DIR"/{web,logs}
+mkdir -p "$INSTALL_DIR"/{app,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
@@ -22,10 +22,10 @@ curl -fSL "$BASE_URL/lmlight-api-$OS-$ARCH" -o "$INSTALL_DIR/api"
 chmod +x "$INSTALL_DIR/api"
 
 # Download Web
-curl -fSL "$BASE_URL/lmlight-web.tar.gz" -o "/tmp/lmlight-web.tar.gz"
-rm -rf "$INSTALL_DIR/web" && mkdir -p "$INSTALL_DIR/web"
-tar -xzf "/tmp/lmlight-web.tar.gz" -C "$INSTALL_DIR/web"
-rm -f /tmp/lmlight-web.tar.gz
+curl -fSL "$BASE_URL/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
+rm -rf "$INSTALL_DIR/app" && mkdir -p "$INSTALL_DIR/app"
+tar -xzf "/tmp/lmlight-app.tar.gz" -C "$INSTALL_DIR/app"
+rm -f /tmp/lmlight-app.tar.gz
 
 # Create .env template only if not exists
 [ ! -f "$INSTALL_DIR/.env" ] && cat > "$INSTALL_DIR/.env" << 'EOF'
@@ -82,8 +82,8 @@ ROOT="$(pwd)"
 nohup ./api > logs/api.log 2>&1 & echo $! > logs/api.pid
 
 # Start Web
-cd web
-nohup node server.js > "$ROOT/logs/web.log" 2>&1 & echo $! > "$ROOT/logs/web.pid"
+cd app
+nohup node server.js > "$ROOT/logs/app.log" 2>&1 & echo $! > "$ROOT/logs/app.pid"
 
 echo "Started: http://localhost:${WEB_PORT:-3000}"
 STARTEOF
@@ -97,7 +97,7 @@ cd "$(dirname "$0")"
 # Load .env for port numbers
 [ -f .env ] && source .env
 
-[ -f logs/web.pid ] && kill $(cat logs/web.pid) 2>/dev/null
+[ -f logs/app.pid ] && kill $(cat logs/app.pid) 2>/dev/null
 [ -f logs/api.pid ] && kill $(cat logs/api.pid) 2>/dev/null
 rm -f logs/*.pid
 
