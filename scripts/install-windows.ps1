@@ -369,14 +369,10 @@ Write-Info "ステップ 5/5: 設定を作成中..."
 # .env ファイル作成 (存在しない場合のみ)
 if (-not (Test-Path "$INSTALL_DIR\.env")) {
     $ENV_CONTENT = @"
+# LM Light Configuration
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}
 OLLAMA_BASE_URL=http://localhost:11434
 LICENSE_FILE_PATH=$INSTALL_DIR\license.lic
-NEXTAUTH_SECRET=randomsecret123
-NEXTAUTH_URL=http://localhost:3000
-AUTH_SECRET=randomsecret123
-AUTH_URL=http://localhost:3000
-NEXT_PUBLIC_API_URL=http://localhost:8000
 API_PORT=8000
 WEB_PORT=3000
 "@
@@ -402,8 +398,6 @@ if (Test-Path "$INSTALL_DIR\.env") {
 }
 
 # Auth.js v5 対応
-$env:AUTH_SECRET = $env:NEXTAUTH_SECRET
-$env:AUTH_URL = $env:NEXTAUTH_URL
 $env:AUTH_TRUST_HOST = "true"
 
 # Tesseract OCR (画像OCR用)
