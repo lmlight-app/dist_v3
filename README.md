@@ -130,6 +130,23 @@ irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-t
 - オフライン・オンプレミス環境での利用に最適
 - 1ライセンス = 1デバイス
 
+#### Hardware UUID 取得方法
+
+ライセンス発行に必要なHardware UUIDを取得してください。
+
+**macOS:**
+-  → このMacについて → 詳細情報 → システムレポート → ハードウェア → 「ハードウェアUUID」
+- またはターミナルで: `ioreg -d2 -c IOPlatformExpertDevice | awk -F\" '/IOPlatformUUID/{print $4}'`
+
+**Windows:**
+- `Win + R` → `msinfo32` → Enter → 「システムの概要」→「UUID」
+- またはPowerShellで: `(Get-CimInstance Win32_ComputerSystemProduct).UUID`
+
+**Linux:**
+- ターミナルで: `sudo cat /sys/class/dmi/id/product_uuid` または `sudo dmidecode -s system-uuid`
+
+#### ライセンスファイル配置
+
 `license.lic` を下記に配置:
 
 - macOS/Linux: `~/.local/lmlight/license.lic`
