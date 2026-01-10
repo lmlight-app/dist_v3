@@ -458,8 +458,6 @@ Write-Host ""
 Write-Host "  Web UI: http://localhost:3000"
 Write-Host "  API:    http://localhost:8000"
 Write-Host ""
-Write-Host "  ログイン: admin@local / admin123"
-Write-Host ""
 Write-Host "  Ctrl+C で停止" -ForegroundColor Yellow
 Write-Host ""
 
@@ -607,7 +605,6 @@ Write-Host "起動: powershell -ExecutionPolicy Bypass -File `"$INSTALL_DIR\star
 Write-Host "停止: powershell -ExecutionPolicy Bypass -File `"$INSTALL_DIR\stop.ps1`"" -ForegroundColor Blue
 Write-Host ""
 Write-Host "Web UI:   http://localhost:3000" -ForegroundColor Blue
-Write-Host "ログイン: admin@local / admin123" -ForegroundColor Blue
 Write-Host ""
 Write-Host "============================================================"
 Write-Host "  ライセンス設定"
