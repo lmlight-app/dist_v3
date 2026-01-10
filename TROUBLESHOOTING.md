@@ -357,5 +357,5 @@ kill -9 <PID>
 問題が解決しない場合、ログを確認:
 ```bash
 cat ~/.local/lmlight/logs/api.log
-cat ~/.local/lmlight/logs/web.log
+cat ~/.local/lmlight/logs/app.log
 ```
