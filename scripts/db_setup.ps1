@@ -178,4 +178,3 @@ $SQL_MIGRATION | psql -q -U postgres -d $DB_NAME 2>$null
 Write-Host "Database setup complete" -ForegroundColor Green
 Write-Host "  User: $DB_USER"
 Write-Host "  Database: $DB_NAME"
-Write-Host "  Admin login: admin@local / admin123"

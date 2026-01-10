@@ -162,4 +162,3 @@ SQLEOF
 echo "✅ Database setup complete"
 echo "   User: $DB_USER"
 echo "   Database: $DB_NAME"
-echo "   Admin login: admin@local / admin123"
