@@ -95,25 +95,10 @@ if [ ! -f .env ]; then
     info "Creating .env file..."
     cat > .env << 'EOF'
 # LM Light Configuration (Docker)
-
-# PostgreSQL (container)
 DATABASE_URL=postgresql://lmlight:lmlight@postgres:5432/lmlight
-
-# Ollama (host machine)
 OLLAMA_BASE_URL=http://host.docker.internal:11434
-
-# License
 LICENSE_FILE_PATH=/app/license.lic
-
-# NextAuth
-NEXTAUTH_SECRET=randomsecret123
-NEXTAUTH_URL=http://localhost:3000
-
-# API
-NEXT_PUBLIC_API_URL=http://localhost:8000
 API_PORT=8000
-
-# Web
 WEB_PORT=3000
 EOF
 fi

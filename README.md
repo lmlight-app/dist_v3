@@ -37,11 +37,11 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 ```bash
 # イメージ取得
 curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-perpetual-docker.tar.gz | docker load
-curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-web-docker.tar.gz | docker load
+curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-app-docker.tar.gz | docker load
 
 # 起動
 docker run -d --name lmlight-perpetual -p 8000:8000 --env-file .env lmlight-perpetual
-docker run -d --name lmlight-web -p 3000:3000 --env-file .env lmlight-web
+docker run -d --name lmlight-app -p 3000:3000 --env-file .env lmlight-app
 ```
 
 ## 環境構築 (インストール前に実行)
@@ -98,17 +98,14 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 
 | 環境変数 | 説明 | デフォルト |
 |---------|------|-----------|
-| `DATABASE_URL` | PostgreSQL接続URL | `postgresql://<user>:<password>@localhost:5432/<database>` |
+| `DATABASE_URL` | PostgreSQL接続URL | `postgresql://lmlight:lmlight@localhost:5432/lmlight` |
 | `OLLAMA_BASE_URL` | OllamaサーバーURL | `http://localhost:11434` |
 | `LICENSE_FILE_PATH` | ライセンスファイルのパス | `~/.local/lmlight/license.lic` |
-| `NEXTAUTH_SECRET` | セッション暗号化キー (任意の文字列) | - |
-| `NEXTAUTH_URL` | WebアプリのURL | `http://localhost:3000` |
-| `NEXT_PUBLIC_API_URL` | APIサーバーURL | `http://localhost:8000` |
 | `API_PORT` | APIポート | `8000` |
 | `WEB_PORT` | Webポート | `3000` |
-| `WHISPER_MODEL` | 文字起こしモデル (tiny/base/small/medium/large) | `tiny` |
 
 ※ インストーラーが自動設定します。手動変更が必要な場合のみ編集してください。
+※ NEXTAUTH_SECRET等のセキュリティ関連設定はアプリ内蔵のため、.envでの設定は不要です。
 
 ### 文字起こし機能 (オプション)
 
@@ -192,7 +189,7 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 ```
 ~/.local/lmlight/
 ├── api                    # APIバイナリ (lmlight-perpetual-*)
-├── web/                   # Webフロントエンド
+├── app/                   # フロントエンド
 ├── models/whisper/        # 文字起こしモデル (オプション)
 ├── .env                   # 設定ファイル
 ├── license.lic            # ライセンス (Hardware UUIDベース)
