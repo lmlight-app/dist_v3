@@ -135,12 +135,11 @@ irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-t
 ライセンス発行に必要なHardware UUIDを取得してください。
 
 **macOS:**
--  → このMacについて → 詳細情報 → システムレポート → ハードウェア → 「ハードウェアUUID」
+- 設定 → 一般 → 情報 → システムレポート → ハードウェア → 「ハードウェアUUID」
 - またはターミナルで: `ioreg -d2 -c IOPlatformExpertDevice | awk -F\" '/IOPlatformUUID/{print $4}'`
 
 **Windows:**
-- `Win + R` → `msinfo32` → Enter → 「システムの概要」→「UUID」
-- またはPowerShellで: `(Get-CimInstance Win32_ComputerSystemProduct).UUID`
+- PowerShellで: `(Get-CimInstance Win32_ComputerSystemProduct).UUID`
 
 **Linux:**
 - ターミナルで: `sudo cat /sys/class/dmi/id/product_uuid` または `sudo dmidecode -s system-uuid`
