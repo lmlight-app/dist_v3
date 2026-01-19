@@ -205,6 +205,7 @@ DO `$`$ BEGIN CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'SUPER', 'USER'); EXCEPTI
 DO `$`$ BEGIN CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INACTIVE'); EXCEPTION WHEN duplicate_object THEN null; END `$`$;
 DO `$`$ BEGIN CREATE TYPE "MessageRole" AS ENUM ('USER', 'ASSISTANT', 'SYSTEM'); EXCEPTION WHEN duplicate_object THEN null; END `$`$;
 DO `$`$ BEGIN CREATE TYPE "ShareType" AS ENUM ('PRIVATE', 'TAG'); EXCEPTION WHEN duplicate_object THEN null; END `$`$;
+DO `$`$ BEGIN CREATE TYPE "DocumentType" AS ENUM ('PDF', 'WEB', 'TEXT', 'CSV', 'EXCEL', 'WORD', 'IMAGE', 'JSON'); EXCEPTION WHEN duplicate_object THEN null; END `$`$;
 
 -- テーブル
 CREATE TABLE IF NOT EXISTS "User" (
@@ -265,8 +266,20 @@ CREATE TABLE IF NOT EXISTS "Bot" (
     "userId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
+    "url" TEXT,
     "shareType" "ShareType" NOT NULL DEFAULT 'PRIVATE',
     "shareTagId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "Document" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "botId" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "type" "DocumentType" NOT NULL DEFAULT 'PDF',
+    "url" TEXT,
+    "metadata" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -309,6 +322,7 @@ CREATE INDEX IF NOT EXISTS "UserTag_userId_idx" ON "UserTag"("userId");
 CREATE INDEX IF NOT EXISTS "UserTag_tagId_idx" ON "UserTag"("tagId");
 CREATE INDEX IF NOT EXISTS "Bot_userId_idx" ON "Bot"("userId");
 CREATE INDEX IF NOT EXISTS "Bot_shareTagId_idx" ON "Bot"("shareTagId");
+CREATE INDEX IF NOT EXISTS "Document_botId_idx" ON "Document"("botId");
 CREATE INDEX IF NOT EXISTS "Chat_sessionId_idx" ON "Chat"("sessionId");
 CREATE INDEX IF NOT EXISTS "Chat_userId_model_idx" ON "Chat"("userId", "model");
 CREATE INDEX IF NOT EXISTS "Chat_userId_idx" ON "Chat"("userId");
