@@ -77,6 +77,10 @@ CREATE TABLE IF NOT EXISTS "UserSettings" (
     "chunkSize" INTEGER NOT NULL DEFAULT 500,
     "chunkOverlap" INTEGER NOT NULL DEFAULT 100,
     "visionModel" TEXT,
+    "brandColor" TEXT NOT NULL DEFAULT 'default',
+    "customLogoText" TEXT,
+    "customLogoImage" TEXT,
+    "customTitle" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
