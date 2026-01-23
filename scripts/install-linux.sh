@@ -86,6 +86,10 @@ CREATE TABLE IF NOT EXISTS "UserSettings" (
     "chunkSize" INTEGER NOT NULL DEFAULT 500,
     "chunkOverlap" INTEGER NOT NULL DEFAULT 100,
     "visionModel" TEXT,
+    "brandColor" TEXT NOT NULL DEFAULT 'default',
+    "customLogoText" TEXT,
+    "customLogoImage" TEXT,
+    "customTitle" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -161,6 +165,20 @@ DO $$ BEGIN
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
 DO $$ BEGIN
     ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+
+-- Brand customization columns
+DO $$ BEGIN
+    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "brandColor" TEXT NOT NULL DEFAULT 'default';
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+DO $$ BEGIN
+    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customLogoText" TEXT;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+DO $$ BEGIN
+    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customLogoImage" TEXT;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+DO $$ BEGIN
+    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customTitle" TEXT;
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
 
 -- pgvector schema
