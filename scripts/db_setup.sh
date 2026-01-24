@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS pgvector.embeddings (
     document_id VARCHAR(255) NOT NULL,
     chunk_id INTEGER NOT NULL,
     content TEXT NOT NULL,
-    embedding vector(768),
+    embedding vector,
     metadata JSONB,
     created_at TIMESTAMP DEFAULT NOW()
 );
