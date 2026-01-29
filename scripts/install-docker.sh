@@ -97,6 +97,7 @@ if [ ! -f .env ]; then
 # LM Light Configuration (Docker)
 DATABASE_URL=postgresql://lmlight:lmlight@postgres:5432/lmlight
 OLLAMA_BASE_URL=http://host.docker.internal:11434
+# OLLAMA_NUM_PARALLEL=8
 LICENSE_FILE_PATH=/app/license.lic
 API_PORT=8000
 WEB_PORT=3000

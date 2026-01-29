@@ -25,6 +25,7 @@ rm -f /tmp/lmlight-app.tar.gz
 # LM Light Configuration
 DATABASE_URL=postgresql://lmlight:lmlight@localhost:5432/lmlight
 OLLAMA_BASE_URL=http://localhost:11434
+# OLLAMA_NUM_PARALLEL=8
 LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
 API_PORT=8000
 WEB_PORT=3000

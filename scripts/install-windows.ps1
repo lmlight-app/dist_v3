@@ -390,6 +390,7 @@ if (-not (Test-Path "$INSTALL_DIR\.env")) {
 # LM Light Configuration
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}
 OLLAMA_BASE_URL=http://localhost:11434
+# OLLAMA_NUM_PARALLEL=8
 LICENSE_FILE_PATH=$INSTALL_DIR\license.lic
 API_PORT=8000
 WEB_PORT=3000
