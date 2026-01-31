@@ -1,6 +1,4 @@
-# LM Light 利用マニュアル (Perpetual License)
-
-> **ライセンス方式**: Hardware UUIDベース永続ライセンス
+# LM Light 利用マニュアル 
 
 ## インストール | アップデート 
 
@@ -216,7 +214,7 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 
 ## ライセンス比較
 
-| 項目 | dist_v2 (Subscription) | dist_v3 (Perpetual) |
+| 項目 | Subscription | Perpetual |
 |------|---------------------|---------------------|
 | ライセンスチェック | 有効期限 | Hardware UUID |
 | ライセンスタイプ | サブスクリプション | 永続 |
