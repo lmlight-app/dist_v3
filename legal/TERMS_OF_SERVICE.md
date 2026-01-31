@@ -175,7 +175,7 @@
 
 **デジタルベース株式会社**
 - ウェブサイト: https://digital-base.co.jp
-- サポート: https://digital-base.co.jp/services/localllm/support
+- プロダクトサイト: https://lmlight.jp/home
 
 ---
 
