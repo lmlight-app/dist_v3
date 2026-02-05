@@ -13,7 +13,36 @@ mkdir -p "$INSTALL_DIR"/{app,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
-curl -fSL "$BASE_URL/lmlight-vllm-linux-$ARCH.tar.gz" -o "/tmp/lmlight-vllm-api.tar.gz"
+# Download and combine split archive files
+echo "📦 Downloading vLLM backend (split archives)..."
+PART_SUFFIX="aa"
+PART_FILES=()
+
+while true; do
+  PART_FILE="lmlight-vllm-linux-$ARCH.tar.gz.part-$PART_SUFFIX"
+  PART_PATH="/tmp/$PART_FILE"
+
+  if ! curl -fSL "$BASE_URL/$PART_FILE" -o "$PART_PATH" 2>/dev/null; then
+    break
+  fi
+
+  PART_FILES+=("$PART_PATH")
+  echo "  ✓ Downloaded part $PART_SUFFIX"
+
+  # Increment suffix (aa -> ab -> ac -> ...)
+  PART_SUFFIX=$(echo "$PART_SUFFIX" | tr 'a-y' 'b-z')
+done
+
+if [ ${#PART_FILES[@]} -eq 0 ]; then
+  echo "❌ No archive parts found"
+  exit 1
+fi
+
+echo "📦 Combining ${#PART_FILES[@]} parts..."
+cat "${PART_FILES[@]}" > /tmp/lmlight-vllm-api.tar.gz
+rm -f "${PART_FILES[@]}"
+
+echo "📦 Extracting..."
 rm -rf "$INSTALL_DIR/api" && mkdir -p "$INSTALL_DIR"
 tar -xzf "/tmp/lmlight-vllm-api.tar.gz" -C "$INSTALL_DIR"
 mv "$INSTALL_DIR/lmlight-vllm-linux-$ARCH" "$INSTALL_DIR/api"
