@@ -212,6 +212,89 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 └── logs/                  # ログ
 ```
 
+---
+
+## vLLM Edition (GPU高速推論版)
+
+NVIDIA GPU環境向けの高スループット版です。Ollamaの代わりにvLLMを使用します。
+
+### インストール (Linux のみ)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-linux-vllm.sh | bash
+```
+
+インストール先: `~/.local/lmlight-vllm`
+
+### 必要な依存関係
+
+| 依存関係 | インストール |
+|---------|------------|
+| Node.js 18+ | `sudo apt install nodejs npm` |
+| PostgreSQL 17 + pgvector | `sudo apt install postgresql postgresql-17-pgvector` |
+| NVIDIA GPU + CUDA | [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) |
+| FFmpeg (文字起こし用) | `sudo apt install ffmpeg` |
+
+### 設定ファイル (.env)
+
+`~/.local/lmlight-vllm/.env` を編集:
+
+| 環境変数 | 説明 | デフォルト |
+|---------|------|-----------|
+| `DATABASE_URL` | PostgreSQL接続URL | `postgresql://lmlight:lmlight@localhost:5432/lmlight` |
+| `VLLM_BASE_URL` | vLLMチャットサーバーURL | `http://localhost:8080` |
+| `VLLM_EMBED_BASE_URL` | vLLM埋め込みサーバーURL | `http://localhost:8081` |
+| `VLLM_VISION_BASE_URL` | vLLM Visionサーバー (任意) | (空 = チャットサーバー使用) |
+| `VLLM_AUTO_START` | vLLM自動起動 | `true` |
+| `VLLM_CHAT_MODEL` | チャットモデル (HuggingFace ID) | `Qwen/Qwen2.5-1.5B-Instruct` |
+| `VLLM_EMBED_MODEL` | 埋め込みモデル | `intfloat/multilingual-e5-large-instruct` |
+| `VLLM_TENSOR_PARALLEL` | テンソル並列GPU数 | `1` |
+| `VLLM_GPU_MEMORY_UTILIZATION` | GPUメモリ使用率 | `0.45` |
+| `VLLM_MAX_MODEL_LEN` | 最大コンテキスト長 | `4096` |
+| `API_PORT` | APIポート | `8000` |
+| `WEB_PORT` | Webポート | `3000` |
+| `LICENSE_FILE_PATH` | ライセンスファイルのパス | `~/.local/lmlight-vllm/license.lic` |
+
+### 起動・停止
+
+```bash
+lmlight-vllm start   # 起動
+lmlight-vllm stop    # 停止
+```
+
+### 注意事項
+
+- **初回起動時**はHuggingFaceからモデルをダウンロード（約3GB、ネットワーク必要）
+- ダウンロード後は `~/.cache/huggingface/hub/` にキャッシュされオフライン動作可能
+- GPU 1枚でchat + embedを動かす場合は `VLLM_GPU_MEMORY_UTILIZATION=0.45` を推奨
+
+### ディレクトリ構造
+
+```
+~/.local/lmlight-vllm/
+├── api                    # APIバイナリ (lmlight-vllm-*)
+├── app/                   # フロントエンド
+├── .env                   # 設定ファイル
+├── license.lic            # ライセンス (Hardware UUIDベース)
+├── start.sh               # 起動
+├── stop.sh                # 停止
+├── lmlight-vllm           # CLIコマンド
+└── logs/                  # ログ
+```
+
+### Ollama版との違い
+
+| 項目 | Ollama版 | vLLM版 |
+|------|---------|--------|
+| LLMエンジン | Ollama | vLLM |
+| GPU要件 | 任意 (CPU可) | NVIDIA GPU必須 |
+| 並列処理 | Ollama依存 | Continuous Batching |
+| モデル形式 | GGUF | HuggingFace |
+| 対応OS | macOS/Linux/Windows | Linux |
+| インストール先 | `~/.local/lmlight` | `~/.local/lmlight-vllm` |
+
+---
+
 ## ライセンス比較
 
 | 項目 | Subscription | Perpetual |

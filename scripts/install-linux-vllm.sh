@@ -39,26 +39,50 @@ VLLM_EMBED_BASE_URL=http://localhost:8081
 
 # =============================================================================
 # vLLM Auto-Start Configuration
+# When enabled, API will automatically start vLLM servers on startup.
+# First run requires network to download models from HuggingFace.
+# Models are cached at ~/.cache/huggingface/hub/
 # =============================================================================
 VLLM_AUTO_START=true
+
+# Models (HuggingFace model IDs)
 VLLM_CHAT_MODEL=Qwen/Qwen2.5-1.5B-Instruct
 VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
 # Optional: Separate vision model (requires VLLM_VISION_BASE_URL)
 # VLLM_VISION_MODEL=Qwen/Qwen2.5-VL-7B-Instruct
 
 # GPU Configuration
+# VLLM_TENSOR_PARALLEL: Number of GPUs for tensor parallelism (default: 1)
+# VLLM_GPU_MEMORY_UTILIZATION: GPU memory ratio per server (0.0-1.0)
+#   Use 0.45 when running both chat + embed on single GPU
+#   Use 0.9 when running one server per GPU
+# VLLM_MAX_MODEL_LEN: Max context length (empty = model default)
 VLLM_TENSOR_PARALLEL=1
 VLLM_GPU_MEMORY_UTILIZATION=0.45
 VLLM_MAX_MODEL_LEN=4096
 
 # =============================================================================
-# License & Auth
+# API Server Configuration
 # =============================================================================
-LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
 API_PORT=8000
+API_HOST=0.0.0.0
+
+# =============================================================================
+# Web Frontend Configuration
+# =============================================================================
 WEB_PORT=3000
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# =============================================================================
+# NextAuth Configuration
+# =============================================================================
 NEXTAUTH_SECRET=randomsecret123
 NEXTAUTH_URL=http://localhost:3000
+
+# =============================================================================
+# License Configuration
+# =============================================================================
+LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
 EOF
 
 # Database setup
