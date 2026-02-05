@@ -265,6 +265,7 @@ lmlight-vllm stop    # 停止
 
 ### 注意事項
 
+- **バイナリサイズ**: PyTorch + CUDA依存関係を含むため約5GB（tar.gz圧縮時）
 - **初回起動時**はHuggingFaceからモデルをダウンロード（約3GB、ネットワーク必要）
 - ダウンロード後は `~/.cache/huggingface/hub/` にキャッシュされオフライン動作可能
 - GPU 1枚でchat + embedを動かす場合は `VLLM_GPU_MEMORY_UTILIZATION=0.45` を推奨
@@ -273,14 +274,16 @@ lmlight-vllm stop    # 停止
 
 ```
 ~/.local/lmlight-vllm/
-├── api                    # APIバイナリ (lmlight-vllm-*)
-├── app/                   # フロントエンド
-├── .env                   # 設定ファイル
-├── license.lic            # ライセンス (Hardware UUIDベース)
-├── start.sh               # 起動
-├── stop.sh                # 停止
-├── lmlight-vllm           # CLIコマンド
-└── logs/                  # ログ
+├── api/
+│   ├── lmlight-vllm-linux-amd64  # 実行ファイル
+│   └── _internal/                 # 依存ライブラリ（PyTorch + CUDA、約5GB）
+├── app/                           # フロントエンド
+├── .env                           # 設定ファイル
+├── license.lic                    # ライセンス (Hardware UUIDベース)
+├── start.sh                       # 起動
+├── stop.sh                        # 停止
+├── lmlight-vllm                   # CLIコマンド
+└── logs/                          # ログ
 ```
 
 ### Ollama版との違い

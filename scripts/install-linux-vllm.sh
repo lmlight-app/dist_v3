@@ -13,8 +13,11 @@ mkdir -p "$INSTALL_DIR"/{app,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
-curl -fSL "$BASE_URL/lmlight-vllm-linux-$ARCH" -o "$INSTALL_DIR/api"
-chmod +x "$INSTALL_DIR/api"
+curl -fSL "$BASE_URL/lmlight-vllm-linux-$ARCH.tar.gz" -o "/tmp/lmlight-vllm-api.tar.gz"
+rm -rf "$INSTALL_DIR/api" && mkdir -p "$INSTALL_DIR"
+tar -xzf "/tmp/lmlight-vllm-api.tar.gz" -C "$INSTALL_DIR"
+mv "$INSTALL_DIR/lmlight-vllm-linux-$ARCH" "$INSTALL_DIR/api"
+rm -f /tmp/lmlight-vllm-api.tar.gz
 
 curl -fSL "$BASE_URL/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
 rm -rf "$INSTALL_DIR/app" && mkdir -p "$INSTALL_DIR/app"
@@ -309,12 +312,12 @@ if ! command -v nvidia-smi &>/dev/null; then
 fi
 
 # Stop existing
-pkill -f "lmlight.*api" 2>/dev/null; pkill -f "node.*server.js" 2>/dev/null; sleep 1
+pkill -f "lmlight-vllm-linux-amd64" 2>/dev/null; pkill -f "node.*server.js" 2>/dev/null; sleep 1
 
 echo "🚀 Starting LM Light (vLLM Edition)..."
 
 # Start API (vLLM auto-start is handled by the API if VLLM_AUTO_START=true)
-./api &
+./api/lmlight-vllm-linux-amd64 &
 API_PID=$!
 
 # Start Web
@@ -340,7 +343,7 @@ cat > "$INSTALL_DIR/stop.sh" << 'EOF'
 pkill -f "lmlight-vllm/start\.sh" 2>/dev/null
 sleep 1
 # Clean up any remaining processes
-pkill -f "\./api$" 2>/dev/null
+pkill -f "lmlight-vllm-linux-amd64" 2>/dev/null
 pkill -f "lmlight-vllm/app.*server\.js" 2>/dev/null
 echo "Stopped"
 EOF
