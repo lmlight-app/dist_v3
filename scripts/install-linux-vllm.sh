@@ -13,35 +13,26 @@ mkdir -p "$INSTALL_DIR"/{app,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
-# Download and combine split archive files
-echo "📦 Downloading vLLM backend (split archives)..."
-PART_SUFFIX="aa"
-PART_FILES=()
+# Download vLLM backend (single file with Git LFS)
+echo "📦 Downloading vLLM backend..."
 
-while true; do
-  PART_FILE="lmlight-vllm-linux-$ARCH.tar.gz.part-$PART_SUFFIX"
-  PART_PATH="/tmp/$PART_FILE"
+BINARY_URL="https://raw.githubusercontent.com/lmlight-app/dist_v3/main/binaries/lmlight-vllm-linux-$ARCH.tar.gz"
 
-  # Download with unlimited timeout and progress display
-  if ! curl -fL --connect-timeout 30 --max-time 0 "$BASE_URL/$PART_FILE" -o "$PART_PATH"; then
-    break
-  fi
-
-  PART_FILES+=("$PART_PATH")
-  echo "  ✓ Downloaded part $PART_SUFFIX"
-
-  # Increment suffix (aa -> ab -> ac -> ...)
-  PART_SUFFIX=$(echo "$PART_SUFFIX" | tr 'a-y' 'b-z')
-done
-
-if [ ${#PART_FILES[@]} -eq 0 ]; then
-  echo "❌ No archive parts found"
-  exit 1
+# Use wget for more reliable downloads with built-in retry
+if command -v wget &>/dev/null; then
+  wget --show-progress --timeout=600 --tries=3 "$BINARY_URL" -O "/tmp/lmlight-vllm-api.tar.gz"
+else
+  curl -fL --connect-timeout 30 --max-time 0 --retry 3 --retry-delay 5 \
+    "$BINARY_URL" -o "/tmp/lmlight-vllm-api.tar.gz"
 fi
 
-echo "📦 Combining ${#PART_FILES[@]} parts..."
-cat "${PART_FILES[@]}" > /tmp/lmlight-vllm-api.tar.gz
-rm -f "${PART_FILES[@]}"
+if [ ! -f "/tmp/lmlight-vllm-api.tar.gz" ] || [ ! -s "/tmp/lmlight-vllm-api.tar.gz" ]; then
+  echo "❌ Failed to download vLLM backend"
+  echo "   Please check:"
+  echo "   1. Network connection"
+  echo "   2. File exists at: $BINARY_URL"
+  exit 1
+fi
 
 echo "📦 Extracting..."
 rm -rf "$INSTALL_DIR/api" && mkdir -p "$INSTALL_DIR"
