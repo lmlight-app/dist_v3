@@ -263,6 +263,36 @@ lmlight-vllm start   # 起動
 lmlight-vllm stop    # 停止
 ```
 
+### カスタムモデルの使用
+
+**ファインチューニング済みモデルやローカルモデルを使う場合**
+
+`.env`ファイルの`VLLM_CHAT_MODEL`と`VLLM_EMBED_MODEL`を変更：
+
+```bash
+# ~/.local/lmlight-vllm/.env
+
+# 1. HuggingFace Hub上のモデル
+VLLM_CHAT_MODEL=username/your-finetuned-model
+VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
+
+# 2. ローカルモデル（絶対パス）
+VLLM_CHAT_MODEL=/home/user/models/my-finetuned-llama
+VLLM_EMBED_MODEL=/home/user/models/my-finetuned-embeddings
+
+# 3. プライベートHuggingFaceモデル
+HF_TOKEN=hf_your_token_here
+VLLM_CHAT_MODEL=private-org/private-model
+```
+
+**ローカルモデルの要件**：HuggingFace Transformers形式（`config.json`, `tokenizer_config.json`, `model.safetensors`等）
+
+設定変更後、再起動：
+```bash
+lmlight-vllm stop
+lmlight-vllm start
+```
+
 ### 注意事項
 
 - **バイナリサイズ**: PyTorch + CUDA依存関係を含むため約5GB（tar.gz圧縮時）
