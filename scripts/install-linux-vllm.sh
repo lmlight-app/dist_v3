@@ -13,10 +13,10 @@ mkdir -p "$INSTALL_DIR"/{app,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
-# Download vLLM backend (single file with Git LFS)
+# Download vLLM backend (from Google Cloud Storage)
 echo "📦 Downloading vLLM backend..."
 
-BINARY_URL="https://raw.githubusercontent.com/lmlight-app/dist_v3/main/binaries/lmlight-vllm-linux-$ARCH.tar.gz"
+BINARY_URL="https://storage.googleapis.com/lmlight-binaries/lmlight-vllm-linux-$ARCH.tar.gz"
 
 # Use wget for more reliable downloads with built-in retry
 if command -v wget &>/dev/null; then
@@ -40,7 +40,7 @@ tar -xzf "/tmp/lmlight-vllm-api.tar.gz" -C "$INSTALL_DIR"
 mv "$INSTALL_DIR/lmlight-vllm-linux-$ARCH" "$INSTALL_DIR/api"
 rm -f /tmp/lmlight-vllm-api.tar.gz
 
-curl -fSL "$BASE_URL/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
+curl -fSL "https://storage.googleapis.com/lmlight-binaries/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
 rm -rf "$INSTALL_DIR/app" && mkdir -p "$INSTALL_DIR/app"
 tar -xzf "/tmp/lmlight-app.tar.gz" -C "$INSTALL_DIR/app"
 rm -f /tmp/lmlight-app.tar.gz
