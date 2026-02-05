@@ -22,7 +22,8 @@ while true; do
   PART_FILE="lmlight-vllm-linux-$ARCH.tar.gz.part-$PART_SUFFIX"
   PART_PATH="/tmp/$PART_FILE"
 
-  if ! curl -fSL "$BASE_URL/$PART_FILE" -o "$PART_PATH" 2>/dev/null; then
+  # Download with unlimited timeout and progress display
+  if ! curl -fL --connect-timeout 30 --max-time 0 "$BASE_URL/$PART_FILE" -o "$PART_PATH"; then
     break
   fi
 
