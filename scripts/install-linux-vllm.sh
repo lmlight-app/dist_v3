@@ -62,6 +62,13 @@ VLLM_GPU_MEMORY_UTILIZATION=0.45
 VLLM_MAX_MODEL_LEN=4096
 
 # =============================================================================
+# Whisper Transcription (GPU auto-detect)
+# Models are downloaded automatically on first use to ~/.cache/whisper/
+# Available: tiny, base, small, medium, large
+# =============================================================================
+WHISPER_MODEL=base
+
+# =============================================================================
 # API Server Configuration
 # =============================================================================
 API_PORT=8000

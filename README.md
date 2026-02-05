@@ -251,6 +251,7 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 | `VLLM_TENSOR_PARALLEL` | テンソル並列GPU数 | `1` |
 | `VLLM_GPU_MEMORY_UTILIZATION` | GPUメモリ使用率 | `0.45` |
 | `VLLM_MAX_MODEL_LEN` | 最大コンテキスト長 | `4096` |
+| `WHISPER_MODEL` | 文字起こしモデル (tiny/base/small/medium/large) | `base` |
 | `API_PORT` | APIポート | `8000` |
 | `WEB_PORT` | Webポート | `3000` |
 | `LICENSE_FILE_PATH` | ライセンスファイルのパス | `~/.local/lmlight-vllm/license.lic` |
