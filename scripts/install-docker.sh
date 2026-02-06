@@ -1,10 +1,25 @@
 #!/bin/bash
 # LM Light Docker Installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-docker.sh | bash
+# Usage:
+#   Ollama版:  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-docker.sh | bash
+#   vLLM版:    EDITION=vllm curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-docker.sh | bash
 
 set -e
 
-INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight}"
+EDITION="${EDITION:-perpetual}"
+DOCKER_USER="${LMLIGHT_DOCKER_USER:-lmlight}"
+
+if [ "$EDITION" = "vllm" ]; then
+    INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight-vllm}"
+    API_IMAGE="$DOCKER_USER/lmlight-vllm:latest"
+    DISPLAY_NAME="LM Light Docker Installer (vLLM Edition)"
+else
+    INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight}"
+    API_IMAGE="$DOCKER_USER/lmlight-perpetual:latest"
+    DISPLAY_NAME="LM Light Docker Installer (Ollama Edition)"
+fi
+
+APP_IMAGE="$DOCKER_USER/lmlight-app:latest"
 
 info() { echo -e "\033[1;34m[INFO]\033[0m $1"; }
 success() { echo -e "\033[1;32m[OK]\033[0m $1"; }
@@ -13,7 +28,7 @@ warn() { echo -e "\033[1;33m[WARN]\033[0m $1"; }
 
 echo ""
 echo "============================================================"
-echo "  LM Light Docker Installer"
+echo "  $DISPLAY_NAME"
 echo "============================================================"
 echo ""
 
@@ -28,33 +43,33 @@ fi
 
 success "Docker found: $(docker --version)"
 
-# Check Ollama
-if command -v ollama &>/dev/null; then
-    success "Ollama found: $(ollama --version 2>/dev/null || echo 'installed')"
-else
-    warn "Ollama not found. Install from: https://ollama.com"
-    warn "LM Light requires Ollama to run LLM models."
+# Check Ollama (perpetual only)
+if [ "$EDITION" != "vllm" ]; then
+    if command -v ollama &>/dev/null; then
+        success "Ollama found: $(ollama --version 2>/dev/null || echo 'installed')"
+    else
+        warn "Ollama not found. Install from: https://ollama.com"
+        warn "LM Light requires Ollama to run LLM models."
+    fi
 fi
 
 # Create install directory
 mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR"
 
-# Download and load Docker images
-BASE_URL="${LMLIGHT_BASE_URL:-https://github.com/lmlight-app/dist_v3/releases/latest/download}"
+# Pull Docker images from Docker Hub
+info "Pulling API image ($API_IMAGE)..."
+docker pull "$API_IMAGE"
 
-info "Downloading API image..."
-curl -fsSL "$BASE_URL/lmlight-perpetual-docker.tar.gz" | docker load
-
-info "Downloading Web image..."
-curl -fsSL "$BASE_URL/lmlight-app-docker.tar.gz" | docker load
+info "Pulling Web image ($APP_IMAGE)..."
+docker pull "$APP_IMAGE"
 
 # Create docker-compose.yml
 info "Creating docker-compose.yml..."
-cat > docker-compose.yml << 'COMPOSE'
+cat > docker-compose.yml << EOF
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: lmlight
       POSTGRES_PASSWORD: lmlight
@@ -68,10 +83,12 @@ services:
       retries: 5
 
   api:
-    image: lmlight-api
+    image: $API_IMAGE
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "\${API_PORT:-8000}:8000"
     env_file: .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./license.lic:/app/license.lic:ro
     depends_on:
@@ -79,33 +96,114 @@ services:
         condition: service_healthy
 
   app:
-    image: lmlight-app
+    image: $APP_IMAGE
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      - "\${WEB_PORT:-3000}:3000"
     env_file: .env
     depends_on:
       - api
 
 volumes:
   pgdata:
-COMPOSE
+EOF
 
 # Create .env file (only if not exists)
 if [ ! -f .env ]; then
     info "Creating .env file..."
-    cat > .env << 'EOF'
-# LM Light Configuration (Docker)
+    if [ "$EDITION" = "vllm" ]; then
+        cat > .env << 'EOF'
+# =============================================================================
+# LM Light Configuration (Docker - vLLM Edition)
+# =============================================================================
+
+# PostgreSQL Database
 DATABASE_URL=postgresql://lmlight:lmlight@postgres:5432/lmlight
-OLLAMA_BASE_URL=http://host.docker.internal:11434
-# OLLAMA_NUM_PARALLEL=8
-LICENSE_FILE_PATH=/app/license.lic
+
+# =============================================================================
+# vLLM Server URLs (running on host, accessed via host.docker.internal)
+# =============================================================================
+VLLM_BASE_URL=http://host.docker.internal:8080
+VLLM_EMBED_BASE_URL=http://host.docker.internal:8081
+# VLLM_VISION_BASE_URL=http://host.docker.internal:8082
+
+# vLLM auto-start is disabled in Docker (start vLLM servers externally)
+VLLM_AUTO_START=false
+
+# Models (HuggingFace model IDs)
+VLLM_CHAT_MODEL=Qwen/Qwen2.5-1.5B-Instruct
+VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
+# VLLM_VISION_MODEL=Qwen/Qwen2.5-VL-7B-Instruct
+
+# GPU Configuration
+VLLM_TENSOR_PARALLEL=1
+VLLM_GPU_MEMORY_UTILIZATION=0.45
+VLLM_MAX_MODEL_LEN=4096
+
+# Whisper Transcription
+WHISPER_MODEL=base
+
+# =============================================================================
+# Server Configuration
+# =============================================================================
 API_PORT=8000
 WEB_PORT=3000
+LICENSE_FILE_PATH=/app/license.lic
+
+# NextAuth
+NEXTAUTH_SECRET=randomsecret123
+NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8000
 EOF
+    else
+        cat > .env << 'EOF'
+# =============================================================================
+# LM Light Configuration (Docker - Ollama Edition)
+# =============================================================================
+
+# PostgreSQL Database
+DATABASE_URL=postgresql://lmlight:lmlight@postgres:5432/lmlight
+
+# Ollama (running on host, accessed via host.docker.internal)
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+# OLLAMA_NUM_PARALLEL=8
+
+# =============================================================================
+# Server Configuration
+# =============================================================================
+API_PORT=8000
+WEB_PORT=3000
+LICENSE_FILE_PATH=/app/license.lic
+
+# NextAuth
+NEXTAUTH_SECRET=randomsecret123
+NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8000
+EOF
+    fi
 fi
 
 # Create start script
-cat > start.sh << 'EOF'
+if [ "$EDITION" = "vllm" ]; then
+    cat > start.sh << 'EOF'
+#!/bin/bash
+cd "$(dirname "$0")"
+
+echo "Starting LM Light (vLLM Edition)..."
+
+docker compose up -d
+
+echo ""
+echo "LM Light is starting..."
+echo "  Web UI: http://localhost:3000"
+echo "  API:    http://localhost:8000"
+echo ""
+echo "  Note: Start vLLM servers externally (VLLM_AUTO_START=false in Docker)"
+echo ""
+echo "To view logs: docker compose logs -f"
+echo "To stop:      docker compose down"
+EOF
+else
+    cat > start.sh << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")"
 
@@ -126,6 +224,7 @@ echo ""
 echo "To view logs: docker compose logs -f"
 echo "To stop:      docker compose down"
 EOF
+fi
 chmod +x start.sh
 
 # Create stop script
@@ -142,10 +241,18 @@ echo "============================================================"
 success "LM Light Docker setup complete!"
 echo "============================================================"
 echo ""
-echo "  Install location: $INSTALL_DIR"
+echo "  Edition:  $EDITION"
+echo "  Location: $INSTALL_DIR"
 echo ""
 echo "  Next steps:"
 echo "    1. Place license.lic in $INSTALL_DIR"
+if [ "$EDITION" != "vllm" ]; then
 echo "    2. Start Ollama: ollama serve"
 echo "    3. Start LM Light: $INSTALL_DIR/start.sh"
+else
+echo "    2. Start vLLM servers externally"
+echo "    3. Start LM Light: $INSTALL_DIR/start.sh"
+fi
+echo ""
+echo "  Default login: admin@local / admin123"
 echo ""

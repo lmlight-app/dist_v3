@@ -26,21 +26,7 @@ irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-w
 - macOS/Linux: `~/.local/lmlight`
 - Windows: `%LOCALAPPDATA%\lmlight`
 
-**Docker:**
-```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-docker.sh | bash
-```
-
-または手動で:
-```bash
-# イメージ取得
-curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-perpetual-docker.tar.gz | docker load
-curl -fSL https://github.com/lmlight-app/dist_v3/releases/latest/download/lmlight-app-docker.tar.gz | docker load
-
-# 起動
-docker run -d --name lmlight-perpetual -p 8000:8000 --env-file .env lmlight-perpetual
-docker run -d --name lmlight-app -p 3000:3000 --env-file .env lmlight-app
-```
+**Docker:** [Docker版](#docker版) を参照
 
 ## 環境構築 (インストール前に実行)
 
@@ -326,6 +312,129 @@ lmlight-vllm start
 | モデル形式 | GGUF | HuggingFace |
 | 対応OS | macOS/Linux/Windows | Linux |
 | インストール先 | `~/.local/lmlight` | `~/.local/lmlight-vllm` |
+
+---
+
+## Docker版
+
+Docker Compose を使ったデプロイ方法です。PostgreSQL (pgvector) も含まれるため、DB の個別インストールは不要です。
+
+### 必要なファイル
+
+以下の3ファイルを同じディレクトリに配置してください。
+
+#### 1. `docker-compose.yml`
+
+```yaml
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: lmlight
+      POSTGRES_PASSWORD: lmlight
+      POSTGRES_DB: lmlight
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  api:
+    image: lmlight/lmlight-vllm:latest   # Ollama版: lmlight/lmlight-perpetual:latest
+    env_file: .env
+    volumes:
+      - ./license.lic:/app/license.lic:ro
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  app:
+    image: lmlight/lmlight-app:latest
+    env_file: .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+```
+
+#### 2. `.env`
+
+**vLLM版:**
+
+```
+DATABASE_URL=postgresql://lmlight:lmlight@postgres:5432/lmlight
+VLLM_BASE_URL=http://host.docker.internal:8080
+VLLM_EMBED_BASE_URL=http://host.docker.internal:8081
+VLLM_AUTO_START=false
+VLLM_CHAT_MODEL=Qwen/Qwen2.5-1.5B-Instruct
+VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
+VLLM_TENSOR_PARALLEL=1
+VLLM_GPU_MEMORY_UTILIZATION=0.45
+# VLLM_MAX_MODEL_LEN=4096
+WHISPER_MODEL=base
+API_PORT=8000
+API_HOST=0.0.0.0
+LICENSE_FILE_PATH=/app/license.lic
+NEXTAUTH_SECRET=<任意の文字列>
+NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+**Ollama版:**
+
+```
+DATABASE_URL=postgresql://lmlight:lmlight@postgres:5432/lmlight
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+API_PORT=8000
+API_HOST=0.0.0.0
+LICENSE_FILE_PATH=/app/license.lic
+NEXTAUTH_SECRET=<任意の文字列>
+NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+#### 3. `license.lic`
+
+発行されたライセンスファイルを同じディレクトリに配置。
+
+### 起動・停止
+
+```bash
+docker compose up -d      # 起動（初回はイメージを自動pull）
+docker compose down        # 停止
+docker compose down -v     # 停止 + データ削除
+docker compose logs -f     # ログ確認
+```
+
+初回起動時に `app` コンテナが自動で DB スキーマ作成・初期ユーザー作成を実行します。
+
+### アクセス
+
+- Web: http://localhost:3000
+- API: http://localhost:8000
+- 初回ログイン: `admin@local` / `admin123`
+
+### Docker Hub イメージ一覧
+
+| イメージ | 説明 |
+|---------|------|
+| `lmlight/lmlight-vllm:latest` | API (vLLM版) |
+| `lmlight/lmlight-perpetual:latest` | API (Ollama版) |
+| `lmlight/lmlight-app:latest` | フロントエンド (共通) |
+| `pgvector/pgvector:pg16` | PostgreSQL + pgvector (公式) |
+
+### 注意事項
+
+- vLLM / Ollama はホスト側で別途起動が必要です（`host.docker.internal` 経由で接続）
+- `.env` の `VLLM_BASE_URL` / `OLLAMA_BASE_URL` はホスト側のサーバーアドレスに合わせてください
+- Kubernetes等でvLLMが別Podにある場合は、そのサービスURLを指定してください
 
 ---
 
