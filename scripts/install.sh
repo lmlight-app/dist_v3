@@ -77,9 +77,9 @@ mkdir -p logs
 ROOT="$(pwd)"
 nohup ./api > logs/api.log 2>&1 & echo $! > logs/api.pid
 
-# Start Web
+# Start Web (Next.js standalone uses PORT env var)
 cd app
-nohup node server.js > "$ROOT/logs/app.log" 2>&1 & echo $! > "$ROOT/logs/app.pid"
+nohup env PORT="${WEB_PORT:-3000}" node server.js > "$ROOT/logs/app.log" 2>&1 & echo $! > "$ROOT/logs/app.pid"
 
 echo "Started: http://localhost:${WEB_PORT:-3000}"
 STARTEOF

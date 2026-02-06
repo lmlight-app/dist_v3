@@ -372,8 +372,8 @@ echo "🚀 Starting LM Light (vLLM Edition)..."
 ./api/lmlight-vllm-linux-amd64 &
 API_PID=$!
 
-# Start Web
-cd app && node server.js &
+# Start Web (Next.js standalone uses PORT env var)
+cd app && PORT="${WEB_PORT:-3000}" node server.js &
 WEB_PID=$!
 
 echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localhost:${WEB_PORT:-3000}"
