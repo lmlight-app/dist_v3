@@ -295,7 +295,7 @@ lmlight-vllm start
 
 ### 注意事項
 
-- **バイナリサイズ**: PyTorch + CUDA依存関係を含むため約5GB（tar.gz圧縮時）
+- **バイナリサイズ**: API本体は約170MB。vLLM/PyTorchは別途venvにインストール（約6GB）
 - **初回起動時**はHuggingFaceからモデルをダウンロード（約3GB、ネットワーク必要）
 - ダウンロード後は `~/.cache/huggingface/hub/` にキャッシュされオフライン動作可能
 - GPU 1枚でchat + embedを動かす場合は `VLLM_GPU_MEMORY_UTILIZATION=0.45` を推奨
@@ -305,8 +305,8 @@ lmlight-vllm start
 ```
 ~/.local/lmlight-vllm/
 ├── api/
-│   ├── lmlight-vllm-linux-amd64  # 実行ファイル
-│   └── _internal/                 # 依存ライブラリ（PyTorch + CUDA、約5GB）
+│   └── lmlight-vllm-linux-amd64  # 実行ファイル (約170MB)
+├── venv/                          # Python venv (vLLM + whisper、約6GB)
 ├── app/                           # フロントエンド
 ├── .env                           # 設定ファイル
 ├── license.lic                    # ライセンス (Hardware UUIDベース)

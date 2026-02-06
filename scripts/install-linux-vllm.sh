@@ -13,20 +13,20 @@ mkdir -p "$INSTALL_DIR"/{app,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
-# Download vLLM backend (from Google Cloud Storage)
+# Download vLLM backend binary (onefile, ~170MB)
 echo " Downloading vLLM backend..."
 
-BINARY_URL="https://storage.googleapis.com/lmlight-binaries/lmlight-vllm-linux-$ARCH.tar.gz"
+BINARY_URL="$BASE_URL/lmlight-vllm-linux-$ARCH"
 
-# Use wget for more reliable downloads with built-in retry
+mkdir -p "$INSTALL_DIR/api"
 if command -v wget &>/dev/null; then
-  wget --show-progress --timeout=600 --tries=3 "$BINARY_URL" -O "/tmp/lmlight-vllm-api.tar.gz"
+  wget --show-progress --timeout=600 --tries=3 "$BINARY_URL" -O "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH"
 else
   curl -fL --connect-timeout 30 --max-time 0 --retry 3 --retry-delay 5 \
-    "$BINARY_URL" -o "/tmp/lmlight-vllm-api.tar.gz"
+    "$BINARY_URL" -o "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH"
 fi
 
-if [ ! -f "/tmp/lmlight-vllm-api.tar.gz" ] || [ ! -s "/tmp/lmlight-vllm-api.tar.gz" ]; then
+if [ ! -f "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH" ] || [ ! -s "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH" ]; then
   echo "❌ Failed to download vLLM backend"
   echo "   Please check:"
   echo "   1. Network connection"
@@ -34,11 +34,7 @@ if [ ! -f "/tmp/lmlight-vllm-api.tar.gz" ] || [ ! -s "/tmp/lmlight-vllm-api.tar.
   exit 1
 fi
 
-echo " Extracting..."
-rm -rf "$INSTALL_DIR/api" && mkdir -p "$INSTALL_DIR"
-tar -xzf "/tmp/lmlight-vllm-api.tar.gz" -C "$INSTALL_DIR"
-mv "$INSTALL_DIR/lmlight-vllm-linux-$ARCH" "$INSTALL_DIR/api"
-rm -f /tmp/lmlight-vllm-api.tar.gz
+chmod +x "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH"
 
 # Python venv for vLLM + whisper (separate from PyInstaller binary)
 echo "Setting up Python environment for vLLM..."
