@@ -37,10 +37,18 @@ fi
 chmod +x "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH"
 
 # Python venv for vLLM + whisper (separate from PyInstaller binary)
+# Requires: Python 3.10+ (3.12+ recommended), CUDA 12.x
 echo "Setting up Python environment for vLLM..."
 if ! command -v python3 &>/dev/null; then
     echo "❌ Python 3 not found. Install python3 and try again."
     exit 1
+fi
+
+# Install uv (recommended by vLLM for faster and more reliable installation)
+if ! command -v uv &>/dev/null; then
+    echo " Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # ffmpeg is required by openai-whisper for audio format conversion
@@ -58,10 +66,9 @@ if ! command -v ffmpeg &>/dev/null; then
 fi
 
 if [ ! -d "$INSTALL_DIR/venv" ]; then
-    python3 -m venv "$INSTALL_DIR/venv"
-    "$INSTALL_DIR/venv/bin/pip" install --upgrade pip
+    uv venv "$INSTALL_DIR/venv"
     echo " Installing vLLM (this may take several minutes)..."
-    "$INSTALL_DIR/venv/bin/pip" install "vllm>=0.15.0" "openai-whisper>=20231117"
+    uv pip install --python "$INSTALL_DIR/venv/bin/python" "vllm>=0.15.1" "openai-whisper>=20231117"
     echo "✅ Python venv ready"
 else
     echo "✅ Python venv already exists (skip)"
