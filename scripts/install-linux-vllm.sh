@@ -40,6 +40,23 @@ tar -xzf "/tmp/lmlight-vllm-api.tar.gz" -C "$INSTALL_DIR"
 mv "$INSTALL_DIR/lmlight-vllm-linux-$ARCH" "$INSTALL_DIR/api"
 rm -f /tmp/lmlight-vllm-api.tar.gz
 
+# Python venv for vLLM + whisper (separate from PyInstaller binary)
+echo "🐍 Setting up Python environment for vLLM..."
+if ! command -v python3 &>/dev/null; then
+    echo "❌ Python 3 not found. Install python3 and try again."
+    exit 1
+fi
+
+if [ ! -d "$INSTALL_DIR/venv" ]; then
+    python3 -m venv "$INSTALL_DIR/venv"
+    "$INSTALL_DIR/venv/bin/pip" install --upgrade pip
+    echo "📦 Installing vLLM (this may take several minutes)..."
+    "$INSTALL_DIR/venv/bin/pip" install "vllm>=0.15.0" "openai-whisper>=20231117"
+    echo "✅ Python venv ready"
+else
+    echo "✅ Python venv already exists (skip)"
+fi
+
 curl -fSL "$BASE_URL/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
 rm -rf "$INSTALL_DIR/app" && mkdir -p "$INSTALL_DIR/app"
 tar -xzf "/tmp/lmlight-app.tar.gz" -C "$INSTALL_DIR/app"
@@ -49,6 +66,9 @@ rm -f /tmp/lmlight-app.tar.gz
 # =============================================================================
 # LM Light Configuration (vLLM Edition)
 # =============================================================================
+
+# Python path for vLLM (auto-configured by installer)
+VLLM_PYTHON=$INSTALL_DIR/venv/bin/python
 
 # PostgreSQL Database
 DATABASE_URL=postgresql://lmlight:lmlight@localhost:5432/lmlight
