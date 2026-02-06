@@ -41,7 +41,7 @@ irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-w
 | pgvector | `brew install pgvector` | `sudo apt install postgresql-17-pgvector` | [手動インストール](https://github.com/pgvector/pgvector#windows) |
 | Ollama | `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` | `winget install Ollama.Ollama` |
 | FFmpeg (文字起こし用) | `brew install ffmpeg` | `sudo apt install ffmpeg` | `winget install Gyan.FFmpeg` |
-| Tesseract OCR (任意) | `brew install tesseract` | `sudo apt install tesseract-ocr` | `winget install UB-Mannheim.TesseractOCR` |
+| Tesseract OCR  | `brew install tesseract` | `sudo apt install tesseract-ocr` | `winget install UB-Mannheim.TesseractOCR` |
 
 ### データベース
 
@@ -222,7 +222,7 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 | NVIDIA GPU + CUDA 12.x | [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) |
 | Python 3.10+ (3.12+推奨) | `sudo apt install python3` |
 | FFmpeg (文字起こし用) | `sudo apt install ffmpeg` |
-| Tesseract OCR (任意) | `sudo apt install tesseract-ocr tesseract-ocr-jpn` |
+| Tesseract OCR | `sudo apt install tesseract-ocr tesseract-ocr-jpn` |
 
 ### 設定ファイル (.env)
 
