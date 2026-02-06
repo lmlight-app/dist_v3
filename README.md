@@ -219,6 +219,7 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 | Node.js 18+ | `sudo apt install nodejs npm` |
 | PostgreSQL 17 + pgvector | `sudo apt install postgresql postgresql-17-pgvector` |
 | NVIDIA GPU + CUDA | [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) |
+| Python 3.10+ | `sudo apt install python3 python3-venv` |
 | FFmpeg (文字起こし用) | `sudo apt install ffmpeg` |
 
 ### 設定ファイル (.env)
@@ -378,12 +379,10 @@ VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
 VLLM_TENSOR_PARALLEL=1
 VLLM_GPU_MEMORY_UTILIZATION=0.45
 # VLLM_MAX_MODEL_LEN=4096
-WHISPER_MODEL=base
+WHISPER_API_URL=http://whisper:9000
 API_PORT=8000
 API_HOST=0.0.0.0
 LICENSE_FILE_PATH=/app/license.lic
-NEXTAUTH_SECRET=<任意の文字列>
-NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
@@ -395,8 +394,6 @@ OLLAMA_BASE_URL=http://host.docker.internal:11434
 API_PORT=8000
 API_HOST=0.0.0.0
 LICENSE_FILE_PATH=/app/license.lic
-NEXTAUTH_SECRET=<任意の文字列>
-NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 

@@ -43,6 +43,20 @@ if ! command -v python3 &>/dev/null; then
     exit 1
 fi
 
+# ffmpeg is required by openai-whisper for audio format conversion
+if ! command -v ffmpeg &>/dev/null; then
+    echo " Installing ffmpeg..."
+    if command -v apt-get &>/dev/null; then
+        sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+    elif command -v dnf &>/dev/null; then
+        sudo dnf install -y ffmpeg
+    elif command -v yum &>/dev/null; then
+        sudo yum install -y ffmpeg
+    else
+        echo "⚠️  ffmpeg not found. Please install ffmpeg manually for audio transcription."
+    fi
+fi
+
 if [ ! -d "$INSTALL_DIR/venv" ]; then
     python3 -m venv "$INSTALL_DIR/venv"
     "$INSTALL_DIR/venv/bin/pip" install --upgrade pip
@@ -99,7 +113,7 @@ VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
 # VLLM_MAX_MODEL_LEN: Max context length (empty = model default)
 VLLM_TENSOR_PARALLEL=1
 VLLM_GPU_MEMORY_UTILIZATION=0.45
-VLLM_MAX_MODEL_LEN=4096
+# VLLM_MAX_MODEL_LEN=4096
 
 # =============================================================================
 # Whisper Transcription (GPU auto-detect)
@@ -119,12 +133,6 @@ API_HOST=0.0.0.0
 # =============================================================================
 WEB_PORT=3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# =============================================================================
-# NextAuth Configuration
-# =============================================================================
-NEXTAUTH_SECRET=randomsecret123
-NEXTAUTH_URL=http://localhost:3000
 
 # =============================================================================
 # License Configuration

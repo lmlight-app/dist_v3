@@ -148,10 +148,6 @@ WHISPER_MODEL=base
 API_PORT=8000
 WEB_PORT=3000
 LICENSE_FILE_PATH=/app/license.lic
-
-# NextAuth
-NEXTAUTH_SECRET=randomsecret123
-NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 EOF
     else
@@ -173,10 +169,6 @@ OLLAMA_BASE_URL=http://host.docker.internal:11434
 API_PORT=8000
 WEB_PORT=3000
 LICENSE_FILE_PATH=/app/license.lic
-
-# NextAuth
-NEXTAUTH_SECRET=randomsecret123
-NEXTAUTH_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 EOF
     fi
