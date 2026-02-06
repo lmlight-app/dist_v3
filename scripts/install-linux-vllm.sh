@@ -7,14 +7,14 @@ INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight-vllm}"
 ARCH="$(uname -m)"
 case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esac
 
-echo "Installing LM Light vLLM Edition ($ARCH) to $INSTALL_DIR"
+echo " Installing LM Light vLLM Edition ($ARCH) to $INSTALL_DIR"
 
 mkdir -p "$INSTALL_DIR"/{app,logs}
 
 [ -f "$INSTALL_DIR/stop.sh" ] && "$INSTALL_DIR/stop.sh" 2>/dev/null || true
 
 # Download vLLM backend (from Google Cloud Storage)
-echo "📦 Downloading vLLM backend..."
+echo " Downloading vLLM backend..."
 
 BINARY_URL="https://storage.googleapis.com/lmlight-binaries/lmlight-vllm-linux-$ARCH.tar.gz"
 
@@ -34,14 +34,14 @@ if [ ! -f "/tmp/lmlight-vllm-api.tar.gz" ] || [ ! -s "/tmp/lmlight-vllm-api.tar.
   exit 1
 fi
 
-echo "📦 Extracting..."
+echo " Extracting..."
 rm -rf "$INSTALL_DIR/api" && mkdir -p "$INSTALL_DIR"
 tar -xzf "/tmp/lmlight-vllm-api.tar.gz" -C "$INSTALL_DIR"
 mv "$INSTALL_DIR/lmlight-vllm-linux-$ARCH" "$INSTALL_DIR/api"
 rm -f /tmp/lmlight-vllm-api.tar.gz
 
 # Python venv for vLLM + whisper (separate from PyInstaller binary)
-echo "🐍 Setting up Python environment for vLLM..."
+echo "Setting up Python environment for vLLM..."
 if ! command -v python3 &>/dev/null; then
     echo "❌ Python 3 not found. Install python3 and try again."
     exit 1
@@ -50,7 +50,7 @@ fi
 if [ ! -d "$INSTALL_DIR/venv" ]; then
     python3 -m venv "$INSTALL_DIR/venv"
     "$INSTALL_DIR/venv/bin/pip" install --upgrade pip
-    echo "📦 Installing vLLM (this may take several minutes)..."
+    echo " Installing vLLM (this may take several minutes)..."
     "$INSTALL_DIR/venv/bin/pip" install "vllm>=0.15.0" "openai-whisper>=20231117"
     echo "✅ Python venv ready"
 else
