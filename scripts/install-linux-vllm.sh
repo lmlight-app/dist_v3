@@ -40,7 +40,7 @@ tar -xzf "/tmp/lmlight-vllm-api.tar.gz" -C "$INSTALL_DIR"
 mv "$INSTALL_DIR/lmlight-vllm-linux-$ARCH" "$INSTALL_DIR/api"
 rm -f /tmp/lmlight-vllm-api.tar.gz
 
-curl -fSL "https://storage.googleapis.com/lmlight-binaries/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
+curl -fSL "$BASE_URL/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
 rm -rf "$INSTALL_DIR/app" && mkdir -p "$INSTALL_DIR/app"
 tar -xzf "/tmp/lmlight-app.tar.gz" -C "$INSTALL_DIR/app"
 rm -f /tmp/lmlight-app.tar.gz
