@@ -1,6 +1,8 @@
 # LM Light 利用マニュアル 
 
-## インストール | アップデート 
+## Ollamaバージョン
+
+### インストール | アップデート 
 
 ### macOS
 
@@ -200,11 +202,10 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 
 ---
 
-## vLLM Edition (GPU高速推論版)
+## vLLMバージョン
 
-NVIDIA GPU環境向けの高スループット版です。Ollamaの代わりにvLLMを使用します。
 
-### インストール (Linux のみ)
+### インストール | アップデート (Linux のみ)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-linux-vllm.sh | bash
@@ -221,6 +222,7 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 | NVIDIA GPU + CUDA 12.x | [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) |
 | Python 3.10+ (3.12+推奨) | `sudo apt install python3` |
 | FFmpeg (文字起こし用) | `sudo apt install ffmpeg` |
+| Tesseract OCR (任意) | `sudo apt install tesseract-ocr tesseract-ocr-jpn` |
 
 ### 設定ファイル (.env)
 
@@ -320,6 +322,14 @@ lmlight-vllm start
 
 Docker Compose を使ったデプロイ方法です。PostgreSQL (pgvector) も含まれるため、DB の個別インストールは不要です。
 
+### 必要な依存関係
+
+| 依存関係 | インストール |
+|---------|------------|
+| Docker Engine | [Install Docker](https://docs.docker.com/engine/install/) |
+| Docker Compose v2 | Docker Engine に同梱 |
+| vLLM or Ollama | ホスト側で別途起動（コンテナ外） |
+
 ### 必要なファイル
 
 以下の3ファイルを同じディレクトリに配置してください。
@@ -359,6 +369,15 @@ services:
     depends_on:
       - postgres
       - api
+    restart: unless-stopped
+
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    environment:
+      ASR_MODEL: base
+      ASR_ENGINE: openai_whisper
+    ports:
+      - "9000:9000"
     restart: unless-stopped
 
 volumes:
