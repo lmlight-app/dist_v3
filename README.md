@@ -446,6 +446,15 @@ docker compose logs -f     # ログ確認
 | `lmlight/lmlight-app:latest` | フロントエンド (共通) |
 | `pgvector/pgvector:pg16` | PostgreSQL + pgvector (公式) |
 
+```bash
+# イメージの手動pull（docker compose up -d で自動pullされますが、事前取得も可能）
+docker pull lmlight/lmlight-vllm:latest                        # vLLM版
+docker pull lmlight/lmlight-perpetual:latest                   # Ollama版
+docker pull lmlight/lmlight-app:latest                         # フロントエンド
+docker pull pgvector/pgvector:pg16                             # PostgreSQL
+docker pull onerahmet/openai-whisper-asr-webservice:latest     # 文字起こし
+```
+
 ### 注意事項
 
 - vLLM / Ollama はホスト側で別途起動が必要です（`host.docker.internal` 経由で接続）
