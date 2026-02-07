@@ -392,7 +392,11 @@ DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NA
 OLLAMA_BASE_URL=http://localhost:11434
 # OLLAMA_NUM_PARALLEL=8
 LICENSE_FILE_PATH=$INSTALL_DIR\license.lic
+
+# Network Configuration
+API_HOST=0.0.0.0
 API_PORT=8000
+WEB_HOST=0.0.0.0
 WEB_PORT=3000
 "@
     Set-Content -Path "$INSTALL_DIR\.env" -Value $ENV_CONTENT -Encoding UTF8
@@ -465,17 +469,30 @@ Write-Host "API を起動中..."
 $apiProcess = Start-Process -FilePath "$INSTALL_DIR\api.exe" -WorkingDirectory $INSTALL_DIR -NoNewWindow -PassThru
 Start-Sleep -Seconds 3
 
-# Web 起動
-$env:PORT = "3000"
-$env:HOSTNAME = "0.0.0.0"
+# Web 起動 (.env から読み取った環境変数を使用)
+if (-not $env:WEB_HOST) { $env:WEB_HOST = "0.0.0.0" }
+if (-not $env:WEB_PORT) { $env:WEB_PORT = "3000" }
+if (-not $env:API_PORT) { $env:API_PORT = "8000" }
+$env:PORT = $env:WEB_PORT
+$env:HOSTNAME = $env:WEB_HOST
 Write-Host "Web を起動中..."
 $appProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$INSTALL_DIR\app" -NoNewWindow -PassThru
 
 Write-Host ""
 Write-Host "LM Light が起動しました！" -ForegroundColor Green
 Write-Host ""
-Write-Host "  Web UI: http://localhost:3000"
-Write-Host "  API:    http://localhost:8000"
+Write-Host "  Web UI: http://localhost:$($env:WEB_PORT)"
+Write-Host "  API:    http://localhost:$($env:API_PORT)"
+
+# LAN IP 表示 (Windows)
+$lanIp = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.PrefixOrigin -ne "WellKnown" } | Select-Object -First 1).IPAddress
+if ($lanIp) {
+    Write-Host ""
+    Write-Host "  LAN アクセス (他の PC から):" -ForegroundColor Cyan
+    Write-Host "    Web: http://$($lanIp):$($env:WEB_PORT)"
+    Write-Host "    API: http://$($lanIp):$($env:API_PORT)"
+}
+
 Write-Host ""
 Write-Host "  Ctrl+C で停止" -ForegroundColor Yellow
 Write-Host ""

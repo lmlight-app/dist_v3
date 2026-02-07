@@ -127,12 +127,13 @@ WHISPER_MODEL=base
 # =============================================================================
 # API Server Configuration
 # =============================================================================
-API_PORT=8000
 API_HOST=0.0.0.0
+API_PORT=8000
 
 # =============================================================================
 # Web Frontend Configuration
 # =============================================================================
+WEB_HOST=0.0.0.0
 WEB_PORT=3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 
@@ -169,17 +170,31 @@ echo "🚀 Starting LM Light (vLLM Edition)..."
 ./api/lmlight-vllm-linux-amd64 &
 API_PID=$!
 
-# Start Web (Next.js standalone uses PORT env var)
-cd app && PORT="${WEB_PORT:-3000}" node server.js &
+# Start Web (Next.js standalone requires both HOSTNAME and PORT)
+cd app && HOSTNAME="${WEB_HOST:-0.0.0.0}" PORT="${WEB_PORT:-3000}" node server.js &
 WEB_PID=$!
 
 echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localhost:${WEB_PORT:-3000}"
-if [ "${VLLM_AUTO_START:-false}" = "true" ]; then
-    echo "   vLLM auto-start enabled (chat: ${VLLM_BASE_URL:-:8080}, embed: ${VLLM_EMBED_BASE_URL:-:8081})"
-else
-    echo "   ⚠️  vLLM auto-start disabled. Start vLLM servers manually."
+
+# Show LAN IP if available
+LAN_IP=$(ip -4 addr show 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
+if [ -n "$LAN_IP" ]; then
+    echo ""
+    echo "🌐 LAN access (from other PCs):"
+    echo "   API: http://$LAN_IP:${API_PORT:-8000}"
+    echo "   Web: http://$LAN_IP:${WEB_PORT:-3000}"
 fi
-echo "   Press Ctrl+C to stop"
+
+if [ "${VLLM_AUTO_START:-false}" = "true" ]; then
+    echo ""
+    echo "🔧 vLLM auto-start enabled (chat: ${VLLM_BASE_URL:-:8080}, embed: ${VLLM_EMBED_BASE_URL:-:8081})"
+else
+    echo ""
+    echo "⚠️  vLLM auto-start disabled. Start vLLM servers manually."
+fi
+
+echo ""
+echo "Press Ctrl+C to stop"
 
 trap "kill $API_PID $WEB_PID 2>/dev/null; echo 'Stopped'" EXIT
 wait

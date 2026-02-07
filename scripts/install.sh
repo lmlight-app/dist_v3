@@ -40,12 +40,14 @@ OLLAMA_BASE_URL=http://localhost:11434
 # License
 LICENSE_FILE_PATH=./license.lic
 
-# API
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# Network Configuration
+API_HOST=0.0.0.0
 API_PORT=8000
+WEB_HOST=0.0.0.0
+WEB_PORT=3000
 
 # Web
-WEB_PORT=3000
+NEXT_PUBLIC_API_URL=http://localhost:8000
 EOF
 
 # start.sh
@@ -61,8 +63,8 @@ if [ -f .env ]; then
 fi
 
 # Check requirements
-command -v node &>/dev/null || { echo "Node.js not found"; exit 1; }
-pg_isready -q 2>/dev/null || { echo "PostgreSQL not running"; exit 1; }
+command -v node &>/dev/null || { echo "❌ Node.js not found"; exit 1; }
+pg_isready -q 2>/dev/null || { echo "❌ PostgreSQL not running"; exit 1; }
 
 # Start Ollama if not running
 pgrep -x "ollama" >/dev/null || { ollama serve >/dev/null 2>&1 & sleep 2; }
@@ -73,15 +75,36 @@ lsof -ti:${WEB_PORT:-3000} 2>/dev/null | xargs kill -9 2>/dev/null || true
 
 mkdir -p logs
 
+echo "🚀 Starting LM Light..."
+
 # Start API
 ROOT="$(pwd)"
 nohup ./api > logs/api.log 2>&1 & echo $! > logs/api.pid
 
-# Start Web (Next.js standalone uses PORT env var)
+# Start Web (Next.js standalone requires both HOSTNAME and PORT)
 cd app
-nohup env PORT="${WEB_PORT:-3000}" node server.js > "$ROOT/logs/app.log" 2>&1 & echo $! > "$ROOT/logs/app.pid"
+nohup env HOSTNAME="${WEB_HOST:-0.0.0.0}" PORT="${WEB_PORT:-3000}" node server.js > "$ROOT/logs/app.log" 2>&1 & echo $! > "$ROOT/logs/app.pid"
 
-echo "Started: http://localhost:${WEB_PORT:-3000}"
+echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localhost:${WEB_PORT:-3000}"
+
+# Show LAN IP if available (auto-detect OS)
+if command -v ip &>/dev/null; then
+    # Linux
+    LAN_IP=$(ip -4 addr show 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
+else
+    # macOS
+    LAN_IP=$(ifconfig 2>/dev/null | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -n1)
+fi
+
+if [ -n "$LAN_IP" ]; then
+    echo ""
+    echo "🌐 LAN access (from other PCs):"
+    echo "   API: http://$LAN_IP:${API_PORT:-8000}"
+    echo "   Web: http://$LAN_IP:${WEB_PORT:-3000}"
+fi
+
+echo ""
+echo "Press Ctrl+C to stop or run stop.sh"
 STARTEOF
 chmod +x "$INSTALL_DIR/start.sh"
 

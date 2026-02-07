@@ -27,7 +27,11 @@ DATABASE_URL=postgresql://lmlight:lmlight@localhost:5432/lmlight
 OLLAMA_BASE_URL=http://localhost:11434
 # OLLAMA_NUM_PARALLEL=8
 LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
+
+# Network Configuration
+API_HOST=0.0.0.0
 API_PORT=8000
+WEB_HOST=0.0.0.0
 WEB_PORT=3000
 EOF
 
@@ -54,12 +58,23 @@ echo "🚀 Starting LM Light..."
 ./api &
 API_PID=$!
 
-# Start Web (Next.js standalone uses PORT env var)
-cd app && PORT="${WEB_PORT:-3000}" node server.js &
+# Start Web (Next.js standalone requires both HOSTNAME and PORT)
+cd app && HOSTNAME="${WEB_HOST:-0.0.0.0}" PORT="${WEB_PORT:-3000}" node server.js &
 WEB_PID=$!
 
 echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localhost:${WEB_PORT:-3000}"
-echo "   Press Ctrl+C to stop"
+
+# Show LAN IP if available (macOS)
+LAN_IP=$(ifconfig 2>/dev/null | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -n1)
+if [ -n "$LAN_IP" ]; then
+    echo ""
+    echo "🌐 LAN access (from other PCs):"
+    echo "   API: http://$LAN_IP:${API_PORT:-8000}"
+    echo "   Web: http://$LAN_IP:${WEB_PORT:-3000}"
+fi
+
+echo ""
+echo "Press Ctrl+C to stop"
 
 trap "kill $API_PID $WEB_PID 2>/dev/null; echo 'Stopped'" EXIT
 wait
