@@ -37,12 +37,7 @@ fi
 chmod +x "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH"
 
 # Python venv for vLLM + whisper (separate from PyInstaller binary)
-# Requires: Python 3.10+ (3.12+ recommended), CUDA 12.x
 echo "Setting up Python environment for vLLM..."
-if ! command -v python3 &>/dev/null; then
-    echo "❌ Python 3 not found. Install python3 and try again."
-    exit 1
-fi
 
 # Install uv (recommended by vLLM for faster and more reliable installation)
 if ! command -v uv &>/dev/null; then
@@ -66,7 +61,7 @@ if ! command -v ffmpeg &>/dev/null; then
 fi
 
 if [ ! -d "$INSTALL_DIR/venv" ]; then
-    uv venv "$INSTALL_DIR/venv"
+    uv venv --python 3.12 "$INSTALL_DIR/venv"
     echo " Installing vLLM (this may take several minutes)..."
     uv pip install --python "$INSTALL_DIR/venv/bin/python" "vllm>=0.15.1" "openai-whisper>=20231117"
     echo "✅ Python venv ready"
@@ -148,206 +143,8 @@ LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
 EOF
 
 # Database setup
-DB_USER="lmlight"
-DB_PASS="lmlight"
-DB_NAME="lmlight"
-
 echo "Setting up database..."
-if command -v psql &>/dev/null; then
-    # Create user and database
-    sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';" 2>/dev/null || true
-    sudo -u postgres psql -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;" 2>/dev/null || true
-    sudo -u postgres psql -c "ALTER USER $DB_USER CREATEDB;" 2>/dev/null || true
-    sudo -u postgres psql -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>/dev/null || true
-
-    # Run migrations
-    PGPASSWORD=$DB_PASS psql -q -U $DB_USER -d $DB_NAME -h localhost << 'SQLEOF'
--- Enums
-DO $$ BEGIN CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'SUPER', 'USER'); EXCEPTION WHEN duplicate_object THEN null; END $$;
-DO $$ BEGIN CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INACTIVE'); EXCEPTION WHEN duplicate_object THEN null; END $$;
-DO $$ BEGIN CREATE TYPE "MessageRole" AS ENUM ('USER', 'ASSISTANT', 'SYSTEM'); EXCEPTION WHEN duplicate_object THEN null; END $$;
-DO $$ BEGIN CREATE TYPE "ShareType" AS ENUM ('PRIVATE', 'TAG'); EXCEPTION WHEN duplicate_object THEN null; END $$;
-DO $$ BEGIN CREATE TYPE "DocumentType" AS ENUM ('PDF', 'WEB', 'TEXT', 'CSV', 'EXCEL', 'WORD', 'IMAGE', 'JSON'); EXCEPTION WHEN duplicate_object THEN null; END $$;
-
--- Tables
-CREATE TABLE IF NOT EXISTS "User" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT,
-    "email" TEXT NOT NULL UNIQUE,
-    "emailVerified" TIMESTAMP(3),
-    "image" TEXT,
-    "hashedPassword" TEXT,
-    "role" "UserRole" NOT NULL DEFAULT 'USER',
-    "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
-    "lastLoginAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "UserSettings" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "userId" TEXT NOT NULL UNIQUE,
-    "defaultModel" TEXT,
-    "customPrompt" TEXT,
-    "historyLimit" INTEGER NOT NULL DEFAULT 2,
-    "temperature" DOUBLE PRECISION NOT NULL DEFAULT 0.7,
-    "maxTokens" INTEGER NOT NULL DEFAULT 2048,
-    "numCtx" INTEGER NOT NULL DEFAULT 8192,
-    "topP" DOUBLE PRECISION NOT NULL DEFAULT 0.9,
-    "topK" INTEGER NOT NULL DEFAULT 40,
-    "repeatPenalty" DOUBLE PRECISION NOT NULL DEFAULT 1.1,
-    "reasoningMode" TEXT NOT NULL DEFAULT 'normal',
-    "ragTopK" INTEGER NOT NULL DEFAULT 5,
-    "ragMinSimilarity" DOUBLE PRECISION NOT NULL DEFAULT 0.45,
-    "embeddingModel" TEXT NOT NULL DEFAULT 'embeddinggemma:latest',
-    "chunkSize" INTEGER NOT NULL DEFAULT 500,
-    "chunkOverlap" INTEGER NOT NULL DEFAULT 100,
-    "visionModel" TEXT,
-    "brandColor" TEXT NOT NULL DEFAULT 'default',
-    "customLogoText" TEXT,
-    "customLogoImage" TEXT,
-    "customTitle" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "Tag" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT NOT NULL UNIQUE,
-    "description" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "UserTag" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "userId" TEXT NOT NULL,
-    "tagId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE ("userId", "tagId")
-);
-
-CREATE TABLE IF NOT EXISTS "Bot" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "userId" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "url" TEXT,
-    "shareType" "ShareType" NOT NULL DEFAULT 'PRIVATE',
-    "shareTagId" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "Document" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "botId" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "type" "DocumentType" NOT NULL DEFAULT 'PDF',
-    "url" TEXT,
-    "metadata" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "Chat" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "userId" TEXT NOT NULL,
-    "model" TEXT NOT NULL,
-    "sessionId" TEXT NOT NULL,
-    "botId" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "Message" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "chatId" TEXT NOT NULL,
-    "role" "MessageRole" NOT NULL,
-    "content" TEXT NOT NULL,
-    "metadata" JSONB,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-DO $$ BEGIN
-    ALTER TABLE "Bot" ADD COLUMN IF NOT EXISTS "url" TEXT;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "Bot" ADD COLUMN IF NOT EXISTS "shareTagId" TEXT;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-
--- Brand customization columns
-DO $$ BEGIN
-    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "brandColor" TEXT NOT NULL DEFAULT 'default';
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customLogoText" TEXT;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customLogoImage" TEXT;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customTitle" TEXT;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-
--- pgvector schema
-CREATE SCHEMA IF NOT EXISTS pgvector;
-CREATE TABLE IF NOT EXISTS pgvector.embeddings (
-    id SERIAL PRIMARY KEY,
-    bot_id VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
-    document_id VARCHAR(255) NOT NULL,
-    chunk_id INTEGER NOT NULL,
-    content TEXT NOT NULL,
-    embedding vector,
-    metadata JSONB,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Indexes
-CREATE INDEX IF NOT EXISTS "UserTag_userId_idx" ON "UserTag"("userId");
-CREATE INDEX IF NOT EXISTS "UserTag_tagId_idx" ON "UserTag"("tagId");
-CREATE INDEX IF NOT EXISTS "Bot_userId_idx" ON "Bot"("userId");
-CREATE INDEX IF NOT EXISTS "Bot_shareTagId_idx" ON "Bot"("shareTagId");
-CREATE INDEX IF NOT EXISTS "Document_botId_idx" ON "Document"("botId");
-CREATE INDEX IF NOT EXISTS "Chat_sessionId_idx" ON "Chat"("sessionId");
-CREATE INDEX IF NOT EXISTS "Chat_userId_model_idx" ON "Chat"("userId", "model");
-CREATE INDEX IF NOT EXISTS "Chat_userId_idx" ON "Chat"("userId");
-CREATE INDEX IF NOT EXISTS "Chat_botId_idx" ON "Chat"("botId");
-CREATE INDEX IF NOT EXISTS "Message_chatId_createdAt_idx" ON "Message"("chatId", "createdAt");
-CREATE INDEX IF NOT EXISTS idx_bot_user ON pgvector.embeddings (bot_id, user_id);
-CREATE INDEX IF NOT EXISTS idx_document ON pgvector.embeddings (document_id);
-
--- Admin user (admin@local / admin123)
-INSERT INTO "User" ("id", "email", "name", "hashedPassword", "role", "status", "updatedAt")
-VALUES (
-    'admin-user-id',
-    'admin@local',
-    'Admin',
-    '$2b$12$AIctg50Pbt418E7ir3HlUOP1HWKO4PSP01HfIsx8v6Ab.Td7G5h72',
-    'ADMIN',
-    'ACTIVE',
-    CURRENT_TIMESTAMP
-) ON CONFLICT ("id") DO NOTHING;
-
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO lmlight;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO lmlight;
-GRANT ALL PRIVILEGES ON SCHEMA pgvector TO lmlight;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pgvector TO lmlight;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pgvector TO lmlight;
-SQLEOF
-    echo "✅ Database setup complete"
-else
-    echo "⚠️  psql not found. Please set up database manually."
-fi
+curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.sh | bash
 
 cat > "$INSTALL_DIR/start.sh" << 'EOF'
 #!/bin/bash

@@ -13,12 +13,19 @@ if ! command -v psql &>/dev/null; then
     exit 1
 fi
 
+# Detect OS for psql connection method
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    PSQL_ADMIN="psql -U postgres"
+else
+    PSQL_ADMIN="sudo -u postgres psql"
+fi
+
 # Create user and database
 echo "Creating user and database..."
-psql -U postgres -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';" 2>/dev/null || echo "User already exists"
-psql -U postgres -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;" 2>/dev/null || echo "Database already exists"
-psql -U postgres -c "ALTER USER $DB_USER CREATEDB;" 2>/dev/null || true
-psql -U postgres -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>/dev/null || echo "pgvector extension already exists or not available"
+$PSQL_ADMIN -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';" 2>/dev/null || true
+$PSQL_ADMIN -c "CREATE DATABASE $DB_NAME OWNER $DB_USER;" 2>/dev/null || true
+$PSQL_ADMIN -c "ALTER USER $DB_USER CREATEDB;" 2>/dev/null || true
+$PSQL_ADMIN -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>/dev/null || true
 
 # Run migrations
 echo "Creating tables..."
@@ -130,6 +137,35 @@ CREATE TABLE IF NOT EXISTS "Message" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+DO $$ BEGIN
+    ALTER TABLE "Bot" ADD COLUMN IF NOT EXISTS "url" TEXT;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "Bot" ADD COLUMN IF NOT EXISTS "shareTagId" TEXT;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+DO $$ BEGIN
+    ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+
+-- Brand customization columns
+DO $$ BEGIN
+    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "brandColor" TEXT NOT NULL DEFAULT 'default';
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+DO $$ BEGIN
+    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customLogoText" TEXT;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+DO $$ BEGIN
+    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customLogoImage" TEXT;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+DO $$ BEGIN
+    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customTitle" TEXT;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+
 -- pgvector schema
 CREATE SCHEMA IF NOT EXISTS pgvector;
 CREATE TABLE IF NOT EXISTS pgvector.embeddings (
@@ -178,5 +214,3 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pgvector TO lmlight;
 SQLEOF
 
 echo "✅ Database setup complete"
-echo "   User: $DB_USER"
-echo "   Database: $DB_NAME"

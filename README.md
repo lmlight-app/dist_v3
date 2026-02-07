@@ -220,7 +220,6 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 | Node.js 18+ | `sudo apt install nodejs npm` |
 | PostgreSQL 17 + pgvector | `sudo apt install postgresql postgresql-17-pgvector` |
 | NVIDIA GPU + CUDA 12.x | [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) |
-| Python 3.10+ (3.12+推奨) | `sudo apt install python3` |
 | FFmpeg (文字起こし用) | `sudo apt install ffmpeg` |
 | Tesseract OCR | `sudo apt install tesseract-ocr tesseract-ocr-jpn` |
 
