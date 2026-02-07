@@ -358,7 +358,7 @@ Docker Compose を使ったデプロイ方法です。PostgreSQL (pgvector) も�
 |---------|------------|
 | Docker Engine | [Install Docker](https://docs.docker.com/engine/install/) |
 | Docker Compose v2 | Docker Engine に同梱 |
-| vLLM or Ollama | ホスト側で別途起動（コンテナ外） |
+| NVIDIA GPU (vLLM版のみ) | [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) |
 
 ### 必要なファイル
 
@@ -418,16 +418,20 @@ volumes:
 
 **vLLM版:**
 
-```
+```bash
 DATABASE_URL=postgresql://lmlight:lmlight@postgres:5432/lmlight
-VLLM_BASE_URL=http://host.docker.internal:8080
-VLLM_EMBED_BASE_URL=http://host.docker.internal:8081
+
+# vLLM サーバー URL（上記の docker run コマンドで起動した場合）
+VLLM_BASE_URL=http://host.docker.internal:8080       # Chat モデル
+VLLM_EMBED_BASE_URL=http://host.docker.internal:8081  # Embedding モデル
+
 VLLM_AUTO_START=false
 VLLM_CHAT_MODEL=Qwen/Qwen2.5-1.5B-Instruct
 VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
 VLLM_TENSOR_PARALLEL=1
 VLLM_GPU_MEMORY_UTILIZATION=0.45
 # VLLM_MAX_MODEL_LEN=4096
+
 WHISPER_API_URL=http://whisper:9000
 API_PORT=8000
 API_HOST=0.0.0.0
@@ -452,11 +456,64 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ### 起動・停止
 
+#### vLLM 版
+
+**1. vLLM を起動（公式 Docker イメージ）**
+
+```bash
+# Chat モデル（ポート 8080）
+docker run -d --name vllm-chat \
+  --gpus all \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  -p 8080:8000 \
+  --ipc=host \
+  vllm/vllm-openai:latest \
+  --model Qwen/Qwen2.5-1.5B-Instruct
+
+# Embedding モデル（ポート 8081）
+docker run -d --name vllm-embed \
+  --gpus all \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  -p 8081:8000 \
+  --ipc=host \
+  vllm/vllm-openai:latest \
+  --model intfloat/multilingual-e5-large-instruct \
+  --task embed
+```
+
+**2. LM Light を起動**
+
 ```bash
 docker compose up -d      # 起動（初回はイメージを自動pull）
+docker compose logs -f    # ログ確認
+```
+
+**3. 停止**
+
+```bash
+docker compose down           # LM Light 停止
+docker stop vllm-chat vllm-embed  # vLLM 停止
+docker compose down -v        # LM Light 停止 + データ削除
+```
+
+#### Ollama 版
+
+**1. Ollama をインストール・起動（ホスト側）**
+
+```bash
+# macOS/Linux
+brew install ollama  # または curl -fsSL https://ollama.com/install.sh | sh
+ollama serve &
+ollama pull gemma3:4b
+ollama pull nomic-embed-text
+```
+
+**2. LM Light を起動**
+
+```bash
+docker compose up -d      # 起動
 docker compose down        # 停止
 docker compose down -v     # 停止 + データ削除
-docker compose logs -f     # ログ確認
 ```
 
 初回起動時に `app` コンテナが自動で DB スキーマ作成・初期ユーザー作成を実行します。
@@ -487,9 +544,15 @@ docker pull onerahmet/openai-whisper-asr-webservice:latest     # 文字起こし
 
 ### 注意事項
 
-- vLLM / Ollama はホスト側で別途起動が必要です（`host.docker.internal` 経由で接続）
-- `.env` の `VLLM_BASE_URL` / `OLLAMA_BASE_URL` はホスト側のサーバーアドレスに合わせてください
-- Kubernetes等でvLLMが別Podにある場合は、そのサービスURLを指定してください
+**vLLM 版:**
+- vLLM は **公式 Docker イメージ**を使用してください: `vllm/vllm-openai:latest`
+- vLLM の詳細な設定（モデル選択、GPU設定など）は[公式ドキュメント](https://docs.vllm.ai/)を参照
+- `.env` の `VLLM_BASE_URL` / `VLLM_EMBED_BASE_URL` はポートに合わせて設定（デフォルト: 8080, 8081）
+- Kubernetes 等で vLLM が別 Pod にある場合は、そのサービス URL を指定してください
+
+**Ollama 版:**
+- Ollama はホスト側で起動（`host.docker.internal` 経由で接続）
+- `.env` の `OLLAMA_BASE_URL` はホスト側のサーバーアドレスに合わせてください
 
 ---
 
