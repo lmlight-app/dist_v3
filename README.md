@@ -87,8 +87,14 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 | `DATABASE_URL` | PostgreSQL接続URL | `postgresql://lmlight:lmlight@localhost:5432/lmlight` |
 | `OLLAMA_BASE_URL` | OllamaサーバーURL | `http://localhost:11434` |
 | `LICENSE_FILE_PATH` | ライセンスファイルのパス | `~/.local/lmlight/license.lic` |
+| `API_HOST` | APIバインドアドレス | `0.0.0.0` (全インターフェース) |
 | `API_PORT` | APIポート | `8000` |
+| `WEB_HOST` | Webバインドアドレス | `0.0.0.0` (全インターフェース) |
 | `WEB_PORT` | Webポート | `3000` |
+
+**ネットワーク設定:**
+- `API_HOST` / `WEB_HOST` を `0.0.0.0` に設定すると、同じLAN内の他のPCからアクセス可能になります
+- `127.0.0.1` に設定すると、同じマシンからのみアクセス可能になります（セキュリティ強化）
 
 ※ インストーラーが自動設定します。手動変更が必要な場合のみ編集してください。
 ※ NEXTAUTH_SECRET等のセキュリティ関連設定はアプリ内蔵のため、.envでの設定は不要です。
@@ -156,10 +162,31 @@ lmlight stop    # 停止
 
 ## アクセス
 
+### ローカルアクセス（同じPC）
+
 - Web: http://localhost:3000
 - API: http://localhost:8000
 
-デフォルトログイン: `admin@local` / `admin123`
+### LANアクセス（他のPC・スマホ・タブレット）
+
+起動時に表示される LAN IP アドレスを使用してください：
+
+```
+🌐 LAN access (from other PCs):
+   API: http://192.168.1.100:8000
+   Web: http://192.168.1.100:3000
+```
+
+**IP アドレスの確認方法:**
+- macOS: `ifconfig | grep "inet "`
+- Linux: `ip addr show`
+- Windows: `ipconfig`
+
+**ネットワーク接続の詳細:** [NETWORK.md](NETWORK.md) を参照してください
+
+### デフォルトログイン
+
+`admin@local` / `admin123`
 
 ※ 初回ログイン後、パスワードを変更してください
 
@@ -240,9 +267,13 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 | `VLLM_GPU_MEMORY_UTILIZATION` | GPUメモリ使用率 | `0.45` |
 | `VLLM_MAX_MODEL_LEN` | 最大コンテキスト長 | `4096` |
 | `WHISPER_MODEL` | 文字起こしモデル (tiny/base/small/medium/large) | `base` |
+| `API_HOST` | APIバインドアドレス | `0.0.0.0` (全インターフェース) |
 | `API_PORT` | APIポート | `8000` |
+| `WEB_HOST` | Webバインドアドレス | `0.0.0.0` (全インターフェース) |
 | `WEB_PORT` | Webポート | `3000` |
 | `LICENSE_FILE_PATH` | ライセンスファイルのパス | `~/.local/lmlight-vllm/license.lic` |
+
+**ネットワーク設定:** Ollama版と同様に、LAN内の他のPCからアクセス可能です。詳細は [NETWORK.md](NETWORK.md) を参照してください。
 
 ### 起動・停止
 
