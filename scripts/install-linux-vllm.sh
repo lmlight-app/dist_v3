@@ -109,12 +109,14 @@ VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
 
 # GPU Configuration
 # VLLM_TENSOR_PARALLEL: Number of GPUs for tensor parallelism (default: 1)
-# VLLM_GPU_MEMORY_UTILIZATION: GPU memory ratio per server (0.0-1.0)
-#   Use 0.45 when running both chat + embed on single GPU
-#   Use 0.9 when running one server per GPU
+# VLLM_GPU_MEMORY_UTILIZATION_{CHAT,EMBED,VISION}: Per-server GPU memory ratio
+#   Unset = vLLM default (0.9), set when running multiple servers on same GPU
+#   2-server (chat + embed):  0.55 + 0.35 = 0.90
+#   3-server (+ vision):      0.35 + 0.25 + 0.30 = 0.90
 # VLLM_MAX_MODEL_LEN: Max context length (empty = model default)
 VLLM_TENSOR_PARALLEL=1
-VLLM_GPU_MEMORY_UTILIZATION=0.45
+VLLM_GPU_MEMORY_UTILIZATION_CHAT=0.55
+VLLM_GPU_MEMORY_UTILIZATION_EMBED=0.35
 # VLLM_MAX_MODEL_LEN=4096
 
 # =============================================================================

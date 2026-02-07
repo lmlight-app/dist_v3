@@ -264,7 +264,9 @@ curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/in
 | `VLLM_CHAT_MODEL` | チャットモデル (HuggingFace ID) | `Qwen/Qwen2.5-1.5B-Instruct` |
 | `VLLM_EMBED_MODEL` | 埋め込みモデル | `intfloat/multilingual-e5-large-instruct` |
 | `VLLM_TENSOR_PARALLEL` | テンソル並列GPU数 | `1` |
-| `VLLM_GPU_MEMORY_UTILIZATION` | GPUメモリ使用率 | `0.45` |
+| `VLLM_GPU_MEMORY_UTILIZATION_CHAT` | Chat GPUメモリ使用率 | `0.55` |
+| `VLLM_GPU_MEMORY_UTILIZATION_EMBED` | Embed GPUメモリ使用率 | `0.35` |
+| `VLLM_GPU_MEMORY_UTILIZATION_VISION` | Vision GPUメモリ使用率 | (未設定=0.9) |
 | `VLLM_MAX_MODEL_LEN` | 最大コンテキスト長 | `4096` |
 | `WHISPER_MODEL` | 文字起こしモデル (tiny/base/small/medium/large) | `base` |
 | `API_HOST` | APIバインドアドレス | `0.0.0.0` (全インターフェース) |
@@ -317,7 +319,7 @@ lmlight-vllm start
 - **バイナリサイズ**: API本体は約170MB。vLLM/PyTorchは別途venvにインストール（約6GB）
 - **初回起動時**はHuggingFaceからモデルをダウンロード（約3GB、ネットワーク必要）
 - ダウンロード後は `~/.cache/huggingface/hub/` にキャッシュされオフライン動作可能
-- GPU 1枚でchat + embedを動かす場合は `VLLM_GPU_MEMORY_UTILIZATION=0.45` を推奨
+- GPU 1枚でchat + embedを動かす場合は `VLLM_GPU_MEMORY_UTILIZATION_CHAT=0.55` / `_EMBED=0.35` を推奨
 
 ### ディレクトリ構造
 
@@ -429,7 +431,8 @@ VLLM_AUTO_START=false
 VLLM_CHAT_MODEL=Qwen/Qwen2.5-1.5B-Instruct
 VLLM_EMBED_MODEL=intfloat/multilingual-e5-large-instruct
 VLLM_TENSOR_PARALLEL=1
-VLLM_GPU_MEMORY_UTILIZATION=0.45
+VLLM_GPU_MEMORY_UTILIZATION_CHAT=0.55
+VLLM_GPU_MEMORY_UTILIZATION_EMBED=0.35
 # VLLM_MAX_MODEL_LEN=4096
 
 WHISPER_API_URL=http://whisper:9000

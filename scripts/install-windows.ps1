@@ -307,6 +307,20 @@ CREATE TABLE IF NOT EXISTS "Message" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS "Workflow" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "webhookUrl" TEXT NOT NULL,
+    "method" TEXT NOT NULL DEFAULT 'POST',
+    "headers" JSONB,
+    "body" JSONB,
+    "createdBy" TEXT NOT NULL,
+    "shareTagId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- pgvector schema
 CREATE SCHEMA IF NOT EXISTS pgvector;
 CREATE TABLE IF NOT EXISTS pgvector.embeddings (
@@ -332,6 +346,8 @@ CREATE INDEX IF NOT EXISTS "Chat_userId_model_idx" ON "Chat"("userId", "model");
 CREATE INDEX IF NOT EXISTS "Chat_userId_idx" ON "Chat"("userId");
 CREATE INDEX IF NOT EXISTS "Chat_botId_idx" ON "Chat"("botId");
 CREATE INDEX IF NOT EXISTS "Message_chatId_createdAt_idx" ON "Message"("chatId", "createdAt");
+CREATE INDEX IF NOT EXISTS "Workflow_createdBy_idx" ON "Workflow"("createdBy");
+CREATE INDEX IF NOT EXISTS "Workflow_shareTagId_idx" ON "Workflow"("shareTagId");
 CREATE INDEX IF NOT EXISTS idx_bot_user ON pgvector.embeddings (bot_id, user_id);
 CREATE INDEX IF NOT EXISTS idx_document ON pgvector.embeddings (document_id);
 

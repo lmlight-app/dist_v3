@@ -5,3 +5,4 @@ binaries/lmlight-vllm-linux-amd64.tar.gz.sha256
 /binaries
 /archives
 /binaries
+.DS_Store
