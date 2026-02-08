@@ -151,6 +151,18 @@ CREATE TABLE IF NOT EXISTS "Workflow" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS "WorkflowExecution" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "workflowId" TEXT NOT NULL,
+    "executedBy" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "statusCode" INTEGER,
+    "response" TEXT,
+    "error" TEXT,
+    "duration" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 DO $$ BEGIN
     ALTER TABLE "Bot" ADD COLUMN IF NOT EXISTS "url" TEXT;
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
@@ -207,6 +219,8 @@ CREATE INDEX IF NOT EXISTS "Chat_botId_idx" ON "Chat"("botId");
 CREATE INDEX IF NOT EXISTS "Message_chatId_createdAt_idx" ON "Message"("chatId", "createdAt");
 CREATE INDEX IF NOT EXISTS "Workflow_createdBy_idx" ON "Workflow"("createdBy");
 CREATE INDEX IF NOT EXISTS "Workflow_shareTagId_idx" ON "Workflow"("shareTagId");
+CREATE INDEX IF NOT EXISTS "WorkflowExecution_workflowId_createdAt_idx" ON "WorkflowExecution"("workflowId", "createdAt");
+CREATE INDEX IF NOT EXISTS "WorkflowExecution_executedBy_idx" ON "WorkflowExecution"("executedBy");
 CREATE INDEX IF NOT EXISTS idx_bot_user ON pgvector.embeddings (bot_id, user_id);
 CREATE INDEX IF NOT EXISTS idx_document ON pgvector.embeddings (document_id);
 
