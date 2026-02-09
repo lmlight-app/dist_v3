@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS "DefaultSetting" (
     "customLogoImage" TEXT,
     "customTitle" TEXT DEFAULT 'LM LIGHT',
     "sidebarItems" JSONB,
+    "sqlConnection" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
