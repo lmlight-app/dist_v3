@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS "User" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS "UserSettings" (
+CREATE TABLE IF NOT EXISTS "DefaultSetting" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL UNIQUE,
     "defaultModel" TEXT,
@@ -72,9 +72,10 @@ CREATE TABLE IF NOT EXISTS "UserSettings" (
     "chunkOverlap" INTEGER NOT NULL DEFAULT 100,
     "visionModel" TEXT,
     "brandColor" TEXT NOT NULL DEFAULT 'default',
-    "customLogoText" TEXT,
+    "customLogoText" TEXT DEFAULT 'LL',
     "customLogoImage" TEXT,
-    "customTitle" TEXT,
+    "customTitle" TEXT DEFAULT 'LM LIGHT',
+    "sidebarItems" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -180,17 +181,27 @@ EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $
 
 -- Brand customization columns
 DO $$ BEGIN
-    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "brandColor" TEXT NOT NULL DEFAULT 'default';
+    ALTER TABLE "DefaultSetting" ADD COLUMN IF NOT EXISTS "brandColor" TEXT NOT NULL DEFAULT 'default';
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
 DO $$ BEGIN
-    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customLogoText" TEXT;
+    ALTER TABLE "DefaultSetting" ADD COLUMN IF NOT EXISTS "customLogoText" TEXT DEFAULT 'LL';
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
 DO $$ BEGIN
-    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customLogoImage" TEXT;
+    ALTER TABLE "DefaultSetting" ADD COLUMN IF NOT EXISTS "customLogoImage" TEXT;
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
 DO $$ BEGIN
-    ALTER TABLE "UserSettings" ADD COLUMN IF NOT EXISTS "customTitle" TEXT;
+    ALTER TABLE "DefaultSetting" ADD COLUMN IF NOT EXISTS "customTitle" TEXT DEFAULT 'LM LIGHT';
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+DO $$ BEGIN
+    ALTER TABLE "DefaultSetting" ADD COLUMN IF NOT EXISTS "sidebarItems" JSONB;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+
+-- Rename from UserSettings if upgrading
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'UserSettings' AND table_schema = 'public') THEN
+        ALTER TABLE "UserSettings" RENAME TO "DefaultSetting";
+    END IF;
+END $$;
 
 -- pgvector schema
 CREATE SCHEMA IF NOT EXISTS pgvector;

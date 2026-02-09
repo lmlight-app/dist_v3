@@ -207,6 +207,13 @@ DO `$`$ BEGIN CREATE TYPE "MessageRole" AS ENUM ('USER', 'ASSISTANT', 'SYSTEM');
 DO `$`$ BEGIN CREATE TYPE "ShareType" AS ENUM ('PRIVATE', 'TAG'); EXCEPTION WHEN duplicate_object THEN null; END `$`$;
 DO `$`$ BEGIN CREATE TYPE "DocumentType" AS ENUM ('PDF', 'WEB', 'TEXT', 'CSV', 'EXCEL', 'WORD', 'IMAGE', 'JSON'); EXCEPTION WHEN duplicate_object THEN null; END `$`$;
 
+-- Rename from UserSettings if upgrading
+DO `$`$ BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'UserSettings' AND table_schema = 'public') THEN
+        ALTER TABLE "UserSettings" RENAME TO "DefaultSetting";
+    END IF;
+END `$`$;
+
 -- テーブル
 CREATE TABLE IF NOT EXISTS "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -222,7 +229,7 @@ CREATE TABLE IF NOT EXISTS "User" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS "UserSettings" (
+CREATE TABLE IF NOT EXISTS "DefaultSetting" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL UNIQUE,
     "defaultModel" TEXT,
@@ -242,9 +249,10 @@ CREATE TABLE IF NOT EXISTS "UserSettings" (
     "chunkOverlap" INTEGER NOT NULL DEFAULT 100,
     "visionModel" TEXT,
     "brandColor" TEXT NOT NULL DEFAULT 'default',
-    "customLogoText" TEXT,
+    "customLogoText" TEXT DEFAULT 'LL',
     "customLogoImage" TEXT,
-    "customTitle" TEXT,
+    "customTitle" TEXT DEFAULT 'LM LIGHT',
+    "sidebarItems" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
