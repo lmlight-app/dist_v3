@@ -145,7 +145,15 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
 EOF
 
-# Database setup
+# Database setup - parse DATABASE_URL from .env if it exists (for updates with custom DB config)
+if [ -f "$INSTALL_DIR/.env" ]; then
+    _DB_URL=$(grep -E "^DATABASE_URL=" "$INSTALL_DIR/.env" | head -1 | cut -d= -f2-)
+    if [ -n "$_DB_URL" ]; then
+        export DB_USER=$(echo "$_DB_URL" | sed -n 's|.*://\([^:]*\):.*|\1|p')
+        export DB_PASS=$(echo "$_DB_URL" | sed -n 's|.*://[^:]*:\([^@]*\)@.*|\1|p')
+        export DB_NAME=$(echo "$_DB_URL" | sed -n 's|.*/\([^?]*\).*|\1|p')
+    fi
+fi
 echo "Setting up database..."
 curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.sh | bash
 

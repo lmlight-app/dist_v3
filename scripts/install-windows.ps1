@@ -8,10 +8,20 @@ $BASE_URL = if ($env:LMLIGHT_BASE_URL) { $env:LMLIGHT_BASE_URL } else { "https:/
 $INSTALL_DIR = if ($env:LMLIGHT_INSTALL_DIR) { $env:LMLIGHT_INSTALL_DIR } else { "$env:LOCALAPPDATA\lmlight" }
 $ARCH = "amd64"  # Windows は x64 のみサポート
 
-# データベース設定
+# データベース設定 (デフォルト値、.env があればそちらを優先)
 $DB_USER = "lmlight"
 $DB_PASSWORD = "lmlight"
 $DB_NAME = "lmlight"
+
+# 既存 .env から DATABASE_URL を読み取り (アップデート時にカスタム設定を反映)
+if (Test-Path "$INSTALL_DIR\.env") {
+    $dbUrlLine = Get-Content "$INSTALL_DIR\.env" | Where-Object { $_ -match "^DATABASE_URL=" } | Select-Object -First 1
+    if ($dbUrlLine -match "^DATABASE_URL=postgresql://([^:]+):([^@]+)@[^/]+/([^?]+)") {
+        $DB_USER = $matches[1]
+        $DB_PASSWORD = $matches[2]
+        $DB_NAME = $matches[3]
+    }
+}
 
 # カラー定義（PowerShell）
 function Write-Info { param($msg) Write-Host "[情報] $msg" -ForegroundColor Blue }
