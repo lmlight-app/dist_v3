@@ -235,6 +235,7 @@ CREATE INDEX IF NOT EXISTS "WorkflowExecution_workflowId_createdAt_idx" ON "Work
 CREATE INDEX IF NOT EXISTS "WorkflowExecution_executedBy_idx" ON "WorkflowExecution"("executedBy");
 CREATE INDEX IF NOT EXISTS idx_bot_user ON pgvector.embeddings (bot_id, user_id);
 CREATE INDEX IF NOT EXISTS idx_document ON pgvector.embeddings (document_id);
+CREATE INDEX IF NOT EXISTS idx_embeddings_hnsw ON pgvector.embeddings USING hnsw (embedding vector_cosine_ops);
 
 -- Admin user (admin@local / admin123)
 INSERT INTO "User" ("id", "email", "name", "hashedPassword", "role", "status", "updatedAt")
