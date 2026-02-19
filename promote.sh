@@ -47,5 +47,9 @@ echo "Uploading scripts to R2..."
 SCRIPT_DIR="$(cd "$(dirname "$0")/scripts" && pwd)"
 rclone copy "$SCRIPT_DIR/" "$BUCKET/scripts/" --progress
 
+echo "Uploading README.md to R2..."
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+rclone copyto "$ROOT_DIR/README.md" "$BUCKET/README.md" --s3-no-check-bucket
+
 echo "Done."
 echo "Public URL: https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/latest/"
