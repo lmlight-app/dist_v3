@@ -7,19 +7,19 @@
 ### macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-macos.sh | bash
+curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-macos.sh | bash
 ```
 
 ### Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-linux.sh | bash
+curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-linux.sh | bash
 ```
 
 ### Windows
 
 ```powershell
-irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
+irm https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-windows.ps1 | iex
 ```
 
 ---
@@ -51,12 +51,12 @@ irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-w
 
 ```bash
 # macOS/Linux
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.sh | bash
+curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/db_setup.sh | bash
 ```
 
 ```powershell
 # Windows
-irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/db_setup.ps1 | iex
+irm https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/db_setup.ps1 | iex
 ```
 
 **データベース削除:**
@@ -105,12 +105,12 @@ ollama pull nomic-embed-text    # RAG用埋め込みモデル (推奨)
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash
+curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-transcribe.sh | bash
 ```
 
 ```powershell
 # Windows
-irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.ps1 | iex
+irm https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-transcribe.ps1 | iex
 ```
 
 ### ライセンス (Perpetual License)
@@ -235,7 +235,7 @@ Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
 ### インストール | アップデート (Linux のみ)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-linux-vllm.sh | bash
+curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-linux-vllm.sh | bash
 ```
 
 インストール先: `~/.local/lmlight-vllm`
