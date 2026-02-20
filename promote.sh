@@ -45,7 +45,8 @@ rclone copy "$TMPDIR/" "$BUCKET/$TAG/" --progress
 
 echo "Uploading scripts to R2..."
 SCRIPT_DIR="$(cd "$(dirname "$0")/scripts" && pwd)"
-rclone copy "$SCRIPT_DIR/" "$BUCKET/scripts/" --progress
+rclone copy "$SCRIPT_DIR/" "$BUCKET/scripts/" --progress \
+  --header-upload "Content-Type: text/plain; charset=utf-8"
 
 echo "Uploading README.md to R2..."
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
