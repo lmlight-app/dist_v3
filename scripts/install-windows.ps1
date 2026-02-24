@@ -534,14 +534,9 @@ Write-Host ""
 Write-Host "  Web UI: http://localhost:$($env:WEB_PORT)"
 Write-Host "  API:    http://localhost:$($env:API_PORT)"
 
-# LAN IP 表示 (Windows)
+# LAN IP 表示
 $lanIp = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.PrefixOrigin -ne "WellKnown" } | Select-Object -First 1).IPAddress
-if ($lanIp) {
-    Write-Host ""
-    Write-Host "  LAN アクセス (他の PC から):" -ForegroundColor Cyan
-    Write-Host "    Web: http://$($lanIp):$($env:WEB_PORT)"
-    Write-Host "    API: http://$($lanIp):$($env:API_PORT)"
-}
+if ($lanIp) { Write-Host "  LAN access (from other PCs): $lanIp" -ForegroundColor Cyan }
 
 Write-Host ""
 Write-Host "  Ctrl+C で停止" -ForegroundColor Yellow

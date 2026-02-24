@@ -72,14 +72,9 @@ WEB_PID=$!
 
 echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localhost:${WEB_PORT:-3000}"
 
-# Show LAN IP if available (macOS)
+# Show LAN IP
 LAN_IP=$(ifconfig 2>/dev/null | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -n1)
-if [ -n "$LAN_IP" ]; then
-    echo ""
-    echo "🌐 LAN access (from other PCs):"
-    echo "   API: http://$LAN_IP:${API_PORT:-8000}"
-    echo "   Web: http://$LAN_IP:${WEB_PORT:-3000}"
-fi
+[ -n "$LAN_IP" ] && echo "🌐 LAN access (from other PCs): $LAN_IP"
 
 echo ""
 echo "Press Ctrl+C to stop"

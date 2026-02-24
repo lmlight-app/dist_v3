@@ -186,14 +186,9 @@ WEB_PID=$!
 
 echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localhost:${WEB_PORT:-3000}"
 
-# Show LAN IP if available
+# Show LAN IP
 LAN_IP=$(ip -4 addr show 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
-if [ -n "$LAN_IP" ]; then
-    echo ""
-    echo "🌐 LAN access (from other PCs):"
-    echo "   API: http://$LAN_IP:${API_PORT:-8000}"
-    echo "   Web: http://$LAN_IP:${WEB_PORT:-3000}"
-fi
+[ -n "$LAN_IP" ] && echo "🌐 LAN access (from other PCs): $LAN_IP"
 
 if [ "${VLLM_AUTO_START:-false}" = "true" ]; then
     echo ""
