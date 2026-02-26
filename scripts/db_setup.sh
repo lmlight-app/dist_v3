@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS "User" (
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "hashedPassword" TEXT,
+    "authProvider" TEXT NOT NULL DEFAULT 'local',
     "role" "UserRole" NOT NULL DEFAULT 'USER',
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "lastLoginAt" TIMESTAMP(3),
@@ -178,6 +179,11 @@ DO $$ BEGIN
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
 DO $$ BEGIN
     ALTER TABLE "Tag" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
+
+-- Auth provider column (AD integration)
+DO $$ BEGIN
+    ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "authProvider" TEXT NOT NULL DEFAULT 'local';
 EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
 
 -- Brand customization columns

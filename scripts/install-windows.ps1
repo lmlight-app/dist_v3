@@ -232,6 +232,7 @@ CREATE TABLE IF NOT EXISTS "User" (
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
     "hashedPassword" TEXT,
+    "authProvider" TEXT NOT NULL DEFAULT 'local',
     "role" "UserRole" NOT NULL DEFAULT 'USER',
     "status" "UserStatus" NOT NULL DEFAULT 'ACTIVE',
     "lastLoginAt" TIMESTAMP(3),
@@ -385,6 +386,11 @@ CREATE INDEX IF NOT EXISTS idx_bot_user ON pgvector.embeddings (bot_id, user_id)
 CREATE INDEX IF NOT EXISTS idx_document ON pgvector.embeddings (document_id);
 CREATE INDEX IF NOT EXISTS idx_embeddings_hnsw ON pgvector.embeddings USING hnsw (embedding vector_cosine_ops);
 
+-- Auth provider column (AD integration, for existing installs)
+DO `$`$ BEGIN
+    ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "authProvider" TEXT NOT NULL DEFAULT 'local';
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END `$`$;
+
 -- 管理者ユーザー (admin@local / admin123)
 INSERT INTO "User" ("id", "email", "name", "hashedPassword", "role", "status", "updatedAt")
 VALUES (
@@ -448,6 +454,23 @@ API_HOST=0.0.0.0
 API_PORT=8000
 WEB_HOST=0.0.0.0
 WEB_PORT=3000
+
+# Authentication: local / ldap / oidc
+NEXT_PUBLIC_AUTH_MODE=local
+
+# LDAP (AUTH_MODE=ldap)
+# LDAP_HOST=your-ad-server.company.local
+# LDAP_PORT=389
+# LDAP_USE_SSL=false
+# LDAP_BASE_DN=dc=company,dc=local
+# LDAP_USER_DN_FORMAT={username}@company.local
+# LDAP_BIND_DN=
+# LDAP_BIND_PASSWORD=
+
+# OIDC / Azure AD (AUTH_MODE=oidc)
+# OIDC_CLIENT_ID=
+# OIDC_CLIENT_SECRET=
+# OIDC_TENANT_ID=
 "@
     Set-Content -Path "$INSTALL_DIR\.env" -Value $ENV_CONTENT -Encoding UTF8
     Write-Success ".env ファイルを作成しました"

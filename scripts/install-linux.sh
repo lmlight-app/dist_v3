@@ -33,6 +33,23 @@ API_HOST=0.0.0.0
 API_PORT=8000
 WEB_HOST=0.0.0.0
 WEB_PORT=3000
+
+# Authentication: local / ldap / oidc
+NEXT_PUBLIC_AUTH_MODE=local
+
+# LDAP (AUTH_MODE=ldap)
+# LDAP_HOST=your-ad-server.company.local
+# LDAP_PORT=389
+# LDAP_USE_SSL=false
+# LDAP_BASE_DN=dc=company,dc=local
+# LDAP_USER_DN_FORMAT={username}@company.local
+# LDAP_BIND_DN=
+# LDAP_BIND_PASSWORD=
+
+# OIDC / Azure AD (AUTH_MODE=oidc)
+# OIDC_CLIENT_ID=
+# OIDC_CLIENT_SECRET=
+# OIDC_TENANT_ID=
 EOF
 
 # Database setup - parse DATABASE_URL from .env if it exists (for updates with custom DB config)
