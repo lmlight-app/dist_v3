@@ -18,15 +18,14 @@ echo " Downloading vLLM backend..."
 
 BINARY_URL="$BASE_URL/lmlight-vllm-linux-$ARCH"
 
-mkdir -p "$INSTALL_DIR/api"
 if command -v wget &>/dev/null; then
-  wget --show-progress --timeout=600 --tries=3 "$BINARY_URL" -O "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH"
+  wget --show-progress --timeout=600 --tries=3 "$BINARY_URL" -O "$INSTALL_DIR/api"
 else
   curl -fL --connect-timeout 30 --max-time 0 --retry 3 --retry-delay 5 \
-    "$BINARY_URL" -o "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH"
+    "$BINARY_URL" -o "$INSTALL_DIR/api"
 fi
 
-if [ ! -f "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH" ] || [ ! -s "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH" ]; then
+if [ ! -f "$INSTALL_DIR/api" ] || [ ! -s "$INSTALL_DIR/api" ]; then
   echo "❌ Failed to download vLLM backend"
   echo "   Please check:"
   echo "   1. Network connection"
@@ -34,7 +33,7 @@ if [ ! -f "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH" ] || [ ! -s "$INSTALL_DIR/
   exit 1
 fi
 
-chmod +x "$INSTALL_DIR/api/lmlight-vllm-linux-$ARCH"
+chmod +x "$INSTALL_DIR/api"
 
 # Python venv for vLLM + whisper (separate from PyInstaller binary)
 echo "Setting up Python environment for vLLM..."
@@ -140,6 +139,25 @@ WEB_PORT=3000
 NEXT_PUBLIC_API_URL=http://localhost:8000
 
 # =============================================================================
+# Authentication: local / ldap / oidc
+# =============================================================================
+NEXT_PUBLIC_AUTH_MODE=local
+
+# LDAP (AUTH_MODE=ldap)
+# LDAP_HOST=your-ad-server.company.local
+# LDAP_PORT=389
+# LDAP_USE_SSL=false
+# LDAP_BASE_DN=dc=company,dc=local
+# LDAP_USER_DN_FORMAT={username}@company.local
+# LDAP_BIND_DN=
+# LDAP_BIND_PASSWORD=
+
+# OIDC / Azure AD (AUTH_MODE=oidc)
+# OIDC_CLIENT_ID=
+# OIDC_CLIENT_SECRET=
+# OIDC_TENANT_ID=
+
+# =============================================================================
 # License Configuration
 # =============================================================================
 LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
@@ -172,12 +190,12 @@ if ! command -v nvidia-smi &>/dev/null; then
 fi
 
 # Stop existing
-pkill -f "lmlight-vllm-linux-amd64" 2>/dev/null; pkill -f "node.*server.js" 2>/dev/null; sleep 1
+pkill -f "lmlight-vllm.*api" 2>/dev/null; pkill -f "node.*server.js" 2>/dev/null; sleep 1
 
 echo "🚀 Starting LM Light (vLLM Edition)..."
 
 # Start API (vLLM auto-start is handled by the API if VLLM_AUTO_START=true)
-./api/lmlight-vllm-linux-amd64 &
+./api &
 API_PID=$!
 
 # Start Web (Next.js standalone requires both HOSTNAME and PORT)
@@ -212,7 +230,7 @@ cat > "$INSTALL_DIR/stop.sh" << 'EOF'
 pkill -f "lmlight-vllm/start\.sh" 2>/dev/null
 sleep 1
 # Clean up any remaining processes
-pkill -f "lmlight-vllm-linux-amd64" 2>/dev/null
+pkill -f "\./api$" 2>/dev/null
 pkill -f "lmlight-vllm/app.*server\.js" 2>/dev/null
 echo "Stopped"
 EOF
