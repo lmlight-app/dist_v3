@@ -61,15 +61,24 @@ fi
 
 if [ ! -d "$INSTALL_DIR/venv" ]; then
     uv venv --python 3.12 "$INSTALL_DIR/venv"
-    echo " Installing vLLM (this may take several minutes)..."
-    uv pip install --python "$INSTALL_DIR/venv/bin/python" "vllm>=0.15.1" "openai-whisper>=20231117"
 
-    # CUDA 13+: vLLM is built for CUDA 12, install compat runtime
+    # Detect CUDA version for vLLM wheel selection
     CUDA_MAJOR=$(nvidia-smi 2>/dev/null | grep -oP 'CUDA Version: \K\d+' || echo "12")
+    echo " CUDA $CUDA_MAJOR detected, installing vLLM..."
+
     if [ "$CUDA_MAJOR" -ge 13 ]; then
-        echo " CUDA $CUDA_MAJOR detected, installing CUDA 12 compat runtime..."
-        uv pip install --python "$INSTALL_DIR/venv/bin/python" "nvidia-cuda-runtime-cu12"
+        # CUDA 13+: use vLLM CUDA 13 wheels
+        uv pip install --python "$INSTALL_DIR/venv/bin/python" \
+            vllm \
+            --extra-index-url "https://wheels.vllm.ai/0.16.0/cu${CUDA_MAJOR}0" \
+            --extra-index-url "https://download.pytorch.org/whl/cu${CUDA_MAJOR}0" \
+            --index-strategy unsafe-best-match
+    else
+        # CUDA 12.x: standard install (compatible with CUDA 12.0-12.9)
+        uv pip install --python "$INSTALL_DIR/venv/bin/python" vllm
     fi
+
+    uv pip install --python "$INSTALL_DIR/venv/bin/python" "openai-whisper>=20231117"
 
     echo "✅ Python venv ready"
 else
@@ -188,11 +197,6 @@ cat > "$INSTALL_DIR/start.sh" << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")"
 set -a; [ -f .env ] && source .env; set +a
-
-# CUDA compat: add venv nvidia libs to LD_LIBRARY_PATH (for CUDA 13+ with CUDA 12 vLLM)
-NVIDIA_LIBS=$(python3 -c "import nvidia.cuda_runtime; import os; print(os.path.dirname(nvidia.cuda_runtime.__file__) + '/lib')" 2>/dev/null \
-  || find venv/lib -path "*/nvidia/cuda_runtime/lib" -type d 2>/dev/null | head -1)
-[ -n "$NVIDIA_LIBS" ] && export LD_LIBRARY_PATH="$NVIDIA_LIBS:${LD_LIBRARY_PATH:-}"
 
 # Check dependencies
 command -v node &>/dev/null || { echo "❌ Node.js not found"; exit 1; }
