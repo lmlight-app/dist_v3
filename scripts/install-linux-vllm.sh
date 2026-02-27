@@ -45,18 +45,15 @@ if ! command -v uv &>/dev/null; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# ffmpeg is required by openai-whisper for audio format conversion
-if ! command -v ffmpeg &>/dev/null; then
-    echo " Installing ffmpeg..."
-    if command -v apt-get &>/dev/null; then
-        sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-    elif command -v dnf &>/dev/null; then
-        sudo dnf install -y ffmpeg
-    elif command -v yum &>/dev/null; then
-        sudo yum install -y ffmpeg
-    else
-        echo "⚠️  ffmpeg not found. Please install ffmpeg manually for audio transcription."
-    fi
+# Build dependencies: python3-dev for Triton JIT, ffmpeg for Whisper
+if command -v apt-get &>/dev/null; then
+    sudo apt-get update -qq && sudo apt-get install -y -qq python3-dev ffmpeg
+elif command -v dnf &>/dev/null; then
+    sudo dnf install -y python3-devel ffmpeg
+elif command -v yum &>/dev/null; then
+    sudo yum install -y python3-devel ffmpeg
+else
+    echo "⚠️  Please install python3-dev and ffmpeg manually."
 fi
 
 if [ ! -d "$INSTALL_DIR/venv" ]; then
@@ -197,6 +194,10 @@ cat > "$INSTALL_DIR/start.sh" << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")"
 set -a; [ -f .env ] && source .env; set +a
+
+# CUDA 13+: Triton bundled ptxas is CUDA 12, need system ptxas
+CUDA_MAJOR=$(nvidia-smi 2>/dev/null | grep -oP 'CUDA Version: \K\d+' || true)
+[ "${CUDA_MAJOR:-0}" -ge 13 ] && [ -f /usr/local/cuda/bin/ptxas ] && export TRITON_PTXAS_PATH=/usr/local/cuda/bin/ptxas
 
 # Check dependencies
 command -v node &>/dev/null || { echo "❌ Node.js not found"; exit 1; }
