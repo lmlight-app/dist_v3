@@ -2,7 +2,7 @@
 # LM Light Installer for macOS
 set -e
 
-BASE_URL="${LMLIGHT_BASE_URL:-https://github.com/lmlight-app/dist_v3/releases/latest/download}"
+BASE_URL="${LMLIGHT_BASE_URL:-https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/latest}"
 INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight}"
 ARCH="$(uname -m)"
 case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esac

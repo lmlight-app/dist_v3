@@ -2,7 +2,7 @@
 # LM Light Installer for Linux (vLLM Edition)
 set -e
 
-BASE_URL="${LMLIGHT_BASE_URL:-https://github.com/lmlight-app/dist_v3/releases/latest/download}"
+BASE_URL="${LMLIGHT_BASE_URL:-https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/latest}"
 INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight-vllm}"
 ARCH="$(uname -m)"
 case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esac
@@ -63,6 +63,14 @@ if [ ! -d "$INSTALL_DIR/venv" ]; then
     uv venv --python 3.12 "$INSTALL_DIR/venv"
     echo " Installing vLLM (this may take several minutes)..."
     uv pip install --python "$INSTALL_DIR/venv/bin/python" "vllm>=0.15.1" "openai-whisper>=20231117"
+
+    # CUDA 13+: vLLM is built for CUDA 12, install compat runtime
+    CUDA_MAJOR=$(nvidia-smi 2>/dev/null | grep -oP 'CUDA Version: \K\d+' || echo "12")
+    if [ "$CUDA_MAJOR" -ge 13 ]; then
+        echo " CUDA $CUDA_MAJOR detected, installing CUDA 12 compat runtime..."
+        uv pip install --python "$INSTALL_DIR/venv/bin/python" "nvidia-cuda-runtime-cu12"
+    fi
+
     echo "✅ Python venv ready"
 else
     echo "✅ Python venv already exists (skip)"
@@ -180,6 +188,11 @@ cat > "$INSTALL_DIR/start.sh" << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")"
 set -a; [ -f .env ] && source .env; set +a
+
+# CUDA compat: add venv nvidia libs to LD_LIBRARY_PATH (for CUDA 13+ with CUDA 12 vLLM)
+NVIDIA_LIBS=$(python3 -c "import nvidia.cuda_runtime; import os; print(os.path.dirname(nvidia.cuda_runtime.__file__) + '/lib')" 2>/dev/null \
+  || find venv/lib -path "*/nvidia/cuda_runtime/lib" -type d 2>/dev/null | head -1)
+[ -n "$NVIDIA_LIBS" ] && export LD_LIBRARY_PATH="$NVIDIA_LIBS:${LD_LIBRARY_PATH:-}"
 
 # Check dependencies
 command -v node &>/dev/null || { echo "❌ Node.js not found"; exit 1; }

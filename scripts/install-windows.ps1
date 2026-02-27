@@ -4,7 +4,7 @@
 $ErrorActionPreference = "Stop"
 
 # 設定
-$BASE_URL = if ($env:LMLIGHT_BASE_URL) { $env:LMLIGHT_BASE_URL } else { "https://github.com/lmlight-app/dist_v3/releases/latest/download" }
+$BASE_URL = if ($env:LMLIGHT_BASE_URL) { $env:LMLIGHT_BASE_URL } else { "https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/latest" }
 $INSTALL_DIR = if ($env:LMLIGHT_INSTALL_DIR) { $env:LMLIGHT_INSTALL_DIR } else { "$env:LOCALAPPDATA\lmlight" }
 $ARCH = "amd64"  # Windows は x64 のみサポート
 
