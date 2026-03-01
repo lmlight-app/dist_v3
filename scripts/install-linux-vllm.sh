@@ -173,6 +173,13 @@ NEXT_PUBLIC_AUTH_MODE=local
 # OIDC_TENANT_ID=
 
 # =============================================================================
+# Offline Mode
+# After models are downloaded, uncomment to run without internet.
+# Not needed if using local model paths (e.g. /path/to/model).
+# =============================================================================
+# HF_HUB_OFFLINE=1
+
+# =============================================================================
 # License Configuration
 # =============================================================================
 LICENSE_FILE_PATH=$INSTALL_DIR/license.lic
