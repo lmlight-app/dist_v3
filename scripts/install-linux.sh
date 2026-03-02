@@ -91,7 +91,12 @@ echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localh
 
 # Show LAN IP
 LAN_IP=$(ip -4 addr show 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v '127.0.0.1' | head -n1)
-[ -n "$LAN_IP" ] && echo "🌐 LAN access (from other PCs): $LAN_IP"
+[ -n "$LAN_IP" ] && echo "🌐 LAN: http://$LAN_IP:${WEB_PORT:-3000}"
+
+# Show mDNS hostname if Avahi is running
+if systemctl is-active --quiet avahi-daemon 2>/dev/null; then
+    echo "🌐 mDNS: http://$(hostname).local:${WEB_PORT:-3000}"
+fi
 
 echo ""
 echo "Press Ctrl+C to stop"
