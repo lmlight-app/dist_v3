@@ -559,7 +559,11 @@ Write-Host "  API:    http://localhost:$($env:API_PORT)"
 
 # LAN IP 表示
 $lanIp = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.PrefixOrigin -ne "WellKnown" } | Select-Object -First 1).IPAddress
-if ($lanIp) { Write-Host "  LAN access (from other PCs): $lanIp" -ForegroundColor Cyan }
+if ($lanIp) { Write-Host "  LAN:  http://${lanIp}:$($env:WEB_PORT)" -ForegroundColor Cyan }
+
+# mDNS hostname 表示 (Windows 10 1709+)
+$mdnsName = "$([System.Net.Dns]::GetHostName()).local"
+Write-Host "  mDNS: http://${mdnsName}:$($env:WEB_PORT)" -ForegroundColor Cyan
 
 Write-Host ""
 Write-Host "  Ctrl+C で停止" -ForegroundColor Yellow

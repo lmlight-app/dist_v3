@@ -91,7 +91,10 @@ echo "✅ Started - API: http://localhost:${API_PORT:-8000} | Web: http://localh
 
 # Show LAN IP
 LAN_IP=$(ifconfig 2>/dev/null | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -n1)
-[ -n "$LAN_IP" ] && echo "🌐 LAN access (from other PCs): $LAN_IP"
+[ -n "$LAN_IP" ] && echo "🌐 LAN: http://$LAN_IP:${WEB_PORT:-3000}"
+
+# Show mDNS hostname (Bonjour is always available on macOS)
+echo "🌐 mDNS: http://$(hostname).local:${WEB_PORT:-3000}"
 
 echo ""
 echo "Press Ctrl+C to stop"
