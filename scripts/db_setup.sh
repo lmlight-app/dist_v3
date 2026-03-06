@@ -36,7 +36,6 @@ DO $$ BEGIN CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INACTIVE'); EXCEPTION W
 DO $$ BEGIN CREATE TYPE "MessageRole" AS ENUM ('USER', 'ASSISTANT', 'SYSTEM'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 DO $$ BEGIN CREATE TYPE "ShareType" AS ENUM ('PRIVATE', 'TAG'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 DO $$ BEGIN CREATE TYPE "DocumentType" AS ENUM ('PDF', 'WEB', 'TEXT', 'CSV', 'EXCEL', 'WORD', 'IMAGE', 'JSON'); EXCEPTION WHEN duplicate_object THEN null; END $$;
-DO $$ BEGIN CREATE TYPE "WorkflowType" AS ENUM ('WEBHOOK', 'APPROVAL'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 -- Tables
 CREATE TABLE IF NOT EXISTS "User" (
@@ -145,15 +144,12 @@ CREATE TABLE IF NOT EXISTS "Workflow" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "webhookUrl" TEXT,
+    "webhookUrl" TEXT NOT NULL,
     "method" TEXT NOT NULL DEFAULT 'POST',
     "headers" JSONB,
     "body" JSONB,
     "createdBy" TEXT NOT NULL,
     "shareTagId" TEXT,
-    "type" "WorkflowType" NOT NULL DEFAULT 'WEBHOOK',
-    "sqlConnection" JSONB,
-    "tableName" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -167,27 +163,6 @@ CREATE TABLE IF NOT EXISTS "WorkflowExecution" (
     "response" TEXT,
     "error" TEXT,
     "duration" INTEGER,
-    "currentStep" INTEGER NOT NULL DEFAULT 1,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS "WorkflowApprovalStep" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "workflowId" TEXT NOT NULL,
-    "stepOrder" INTEGER NOT NULL,
-    "tagId" TEXT NOT NULL,
-    "name" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE ("workflowId", "stepOrder")
-);
-
-CREATE TABLE IF NOT EXISTS "WorkflowApprovalRecord" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "executionId" TEXT NOT NULL,
-    "stepOrder" INTEGER NOT NULL,
-    "approvedBy" TEXT NOT NULL,
-    "action" TEXT NOT NULL,
-    "comment" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -235,20 +210,6 @@ DO $$ BEGIN
     END IF;
 END $$;
 
--- Workflow approval columns
-DO $$ BEGIN
-    ALTER TABLE "Workflow" ADD COLUMN IF NOT EXISTS "type" "WorkflowType" NOT NULL DEFAULT 'WEBHOOK';
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "Workflow" ADD COLUMN IF NOT EXISTS "sqlConnection" JSONB;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "Workflow" ADD COLUMN IF NOT EXISTS "tableName" TEXT;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-DO $$ BEGIN
-    ALTER TABLE "WorkflowExecution" ADD COLUMN IF NOT EXISTS "currentStep" INTEGER NOT NULL DEFAULT 1;
-EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END $$;
-
 -- pgvector schema
 CREATE SCHEMA IF NOT EXISTS pgvector;
 CREATE TABLE IF NOT EXISTS pgvector.embeddings (
@@ -278,9 +239,6 @@ CREATE INDEX IF NOT EXISTS "Workflow_createdBy_idx" ON "Workflow"("createdBy");
 CREATE INDEX IF NOT EXISTS "Workflow_shareTagId_idx" ON "Workflow"("shareTagId");
 CREATE INDEX IF NOT EXISTS "WorkflowExecution_workflowId_createdAt_idx" ON "WorkflowExecution"("workflowId", "createdAt");
 CREATE INDEX IF NOT EXISTS "WorkflowExecution_executedBy_idx" ON "WorkflowExecution"("executedBy");
-CREATE INDEX IF NOT EXISTS "WorkflowApprovalStep_workflowId_idx" ON "WorkflowApprovalStep"("workflowId");
-CREATE INDEX IF NOT EXISTS "WorkflowApprovalStep_tagId_idx" ON "WorkflowApprovalStep"("tagId");
-CREATE INDEX IF NOT EXISTS "WorkflowApprovalRecord_executionId_idx" ON "WorkflowApprovalRecord"("executionId");
 CREATE INDEX IF NOT EXISTS idx_bot_user ON pgvector.embeddings (bot_id, user_id);
 CREATE INDEX IF NOT EXISTS idx_document ON pgvector.embeddings (document_id);
 CREATE INDEX IF NOT EXISTS idx_embeddings_hnsw ON pgvector.embeddings USING hnsw (embedding vector_cosine_ops);
