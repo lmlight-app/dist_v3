@@ -67,7 +67,7 @@ if [ ! -d "$INSTALL_DIR/venv" ]; then
         # CUDA 13+: use vLLM CUDA 13 wheels
         uv pip install --python "$INSTALL_DIR/venv/bin/python" \
             vllm \
-            --extra-index-url "https://wheels.vllm.ai/0.16.0/cu${CUDA_MAJOR}0" \
+            --extra-index-url "https://wheels.vllm.ai/0.17.0/cu${CUDA_MAJOR}0" \
             --extra-index-url "https://download.pytorch.org/whl/cu${CUDA_MAJOR}0" \
             --index-strategy unsafe-best-match
     else
