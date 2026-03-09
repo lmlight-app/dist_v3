@@ -58,29 +58,27 @@ fi
 
 if [ ! -d "$INSTALL_DIR/venv" ]; then
     uv venv --python 3.12 "$INSTALL_DIR/venv"
-
-    # Detect CUDA version for vLLM wheel selection
-    CUDA_MAJOR=$(nvidia-smi 2>/dev/null | grep -oP 'CUDA Version: \K\d+' || echo "12")
-    echo " CUDA $CUDA_MAJOR detected, installing vLLM..."
-
-    if [ "$CUDA_MAJOR" -ge 13 ]; then
-        # CUDA 13+: use vLLM CUDA 13 wheels
-        uv pip install --python "$INSTALL_DIR/venv/bin/python" \
-            vllm \
-            --extra-index-url "https://wheels.vllm.ai/0.17.0/cu${CUDA_MAJOR}0" \
-            --extra-index-url "https://download.pytorch.org/whl/cu${CUDA_MAJOR}0" \
-            --index-strategy unsafe-best-match
-    else
-        # CUDA 12.x: standard install (compatible with CUDA 12.0-12.9)
-        uv pip install --python "$INSTALL_DIR/venv/bin/python" vllm
-    fi
-
-    uv pip install --python "$INSTALL_DIR/venv/bin/python" "openai-whisper>=20231117"
-
-    echo "✅ Python venv ready"
-else
-    echo "✅ Python venv already exists (skip)"
 fi
+
+# Detect CUDA version for vLLM wheel selection
+CUDA_MAJOR=$(nvidia-smi 2>/dev/null | grep -oP 'CUDA Version: \K\d+' || echo "12")
+echo " CUDA $CUDA_MAJOR detected, installing vLLM..."
+
+if [ "$CUDA_MAJOR" -ge 13 ]; then
+    # CUDA 13+: use vLLM CUDA 13 wheels
+    uv pip install --python "$INSTALL_DIR/venv/bin/python" \
+        vllm \
+        --extra-index-url "https://wheels.vllm.ai/0.17.0/cu${CUDA_MAJOR}0" \
+        --extra-index-url "https://download.pytorch.org/whl/cu${CUDA_MAJOR}0" \
+        --index-strategy unsafe-best-match
+else
+    # CUDA 12.x: standard install (compatible with CUDA 12.0-12.9)
+    uv pip install --python "$INSTALL_DIR/venv/bin/python" vllm
+fi
+
+uv pip install --python "$INSTALL_DIR/venv/bin/python" "openai-whisper>=20231117"
+
+echo "✅ Python venv ready"
 
 curl -fSL "$BASE_URL/lmlight-app.tar.gz" -o "/tmp/lmlight-app.tar.gz"
 rm -rf "$INSTALL_DIR/app" && mkdir -p "$INSTALL_DIR/app"
