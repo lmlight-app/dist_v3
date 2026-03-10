@@ -131,6 +131,12 @@ VLLM_GPU_MEMORY_UTILIZATION_EMBED=0.10
 # VLLM_GPU_MEMORY_UTILIZATION_VISION=0.25
 # VLLM_MAX_MODEL_LEN=4096
 
+# Additional vLLM arguments (space-separated, passed directly to vllm serve)
+# Examples: --enforce-eager, --enable-prefix-caching, --quantization awq, --dtype half
+# VLLM_EXTRA_ARGS_CHAT=--enforce-eager --enable-prefix-caching
+# VLLM_EXTRA_ARGS_EMBED=--enforce-eager
+# VLLM_EXTRA_ARGS_VISION=--enforce-eager
+
 # =============================================================================
 # Whisper Transcription (GPU auto-detect)
 # Models are downloaded automatically on first use to ~/.cache/whisper/
