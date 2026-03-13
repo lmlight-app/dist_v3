@@ -359,6 +359,7 @@ CREATE TABLE IF NOT EXISTS "ApprovalFlow" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "requesterIds" JSONB NOT NULL,
+    "notificationWebhookUrl" TEXT,
     "createdBy" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -397,6 +398,32 @@ CREATE TABLE IF NOT EXISTS "ApprovalStepResult" (
     UNIQUE ("requestId", "stepOrder")
 );
 
+CREATE TABLE IF NOT EXISTS "SavedSqlConnection" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "host" TEXT NOT NULL DEFAULT 'localhost',
+    "port" INTEGER NOT NULL DEFAULT 5432,
+    "database" TEXT NOT NULL,
+    "dbUser" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "shareType" "ShareType" NOT NULL DEFAULT 'PRIVATE',
+    "shareTagId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "Prompt" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "title" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "shareType" "ShareType" NOT NULL DEFAULT 'PRIVATE',
+    "shareTagId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- pgvector schema
 CREATE SCHEMA IF NOT EXISTS pgvector;
 CREATE TABLE IF NOT EXISTS pgvector.embeddings (
@@ -431,9 +458,18 @@ CREATE INDEX IF NOT EXISTS "ApprovalFlowStep_flowId_idx" ON "ApprovalFlowStep"("
 CREATE INDEX IF NOT EXISTS "ApprovalRequest_flowId_idx" ON "ApprovalRequest"("flowId");
 CREATE INDEX IF NOT EXISTS "ApprovalRequest_requestedBy_idx" ON "ApprovalRequest"("requestedBy");
 CREATE INDEX IF NOT EXISTS "ApprovalStepResult_requestId_idx" ON "ApprovalStepResult"("requestId");
+CREATE INDEX IF NOT EXISTS "SavedSqlConnection_userId_idx" ON "SavedSqlConnection"("userId");
+CREATE INDEX IF NOT EXISTS "SavedSqlConnection_shareTagId_idx" ON "SavedSqlConnection"("shareTagId");
+CREATE INDEX IF NOT EXISTS "Prompt_userId_idx" ON "Prompt"("userId");
+CREATE INDEX IF NOT EXISTS "Prompt_shareTagId_idx" ON "Prompt"("shareTagId");
 CREATE INDEX IF NOT EXISTS idx_bot_user ON pgvector.embeddings (bot_id, user_id);
 CREATE INDEX IF NOT EXISTS idx_document ON pgvector.embeddings (document_id);
 CREATE INDEX IF NOT EXISTS idx_embeddings_hnsw ON pgvector.embeddings USING hnsw (embedding vector_cosine_ops);
+
+-- Approval notification webhook URL
+DO `$`$ BEGIN
+    ALTER TABLE "ApprovalFlow" ADD COLUMN IF NOT EXISTS "notificationWebhookUrl" TEXT;
+EXCEPTION WHEN undefined_table THEN null; WHEN duplicate_column THEN null; END `$`$;
 
 -- Auth provider column (AD integration, for existing installs)
 DO `$`$ BEGIN
