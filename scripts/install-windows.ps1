@@ -540,6 +540,11 @@ API_PORT=8000
 WEB_HOST=0.0.0.0
 WEB_PORT=3000
 
+# Whisper Transcription
+# Install model first: install-transcribe.ps1 [tiny|base|small|medium|large]
+# With GPU (pip install openai-whisper torch), GPU is auto-detected
+# WHISPER_MODEL=tiny
+
 # Authentication: local / ldap / oidc
 NEXT_PUBLIC_AUTH_MODE=local
 
