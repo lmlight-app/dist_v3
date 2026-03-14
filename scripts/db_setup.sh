@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS "Workflow" (
     "method" TEXT NOT NULL DEFAULT 'POST',
     "headers" JSONB,
     "body" JSONB,
+    "attachments" JSONB,
     "createdBy" TEXT NOT NULL,
     "shareTagId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
