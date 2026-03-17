@@ -26,7 +26,7 @@ show_usage() {
     echo "  学習済み .pt ファイルを ${MODEL_DIR}/ に配置してください"
     echo ""
     echo "リモート実行:"
-    echo "  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-yolo.sh | bash -s -- yolov8s"
+    echo "  curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-yolo.sh | bash -s -- yolov8s"
 }
 
 get_model_size() {
@@ -97,10 +97,19 @@ else
     exit 1
 fi
 
-# Install ultralytics (uv project only)
+# Install ultralytics
 echo ""
-if [ -f "${INSTALL_DIR}/pyproject.toml" ] && command -v uv &> /dev/null; then
-    echo "📦 ultralyticsパッケージを確認中..."
+echo "📦 ultralyticsパッケージを確認中..."
+
+# Ensure uv is available
+if ! command -v uv &> /dev/null; then
+    echo "📥 uv をインストール中..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# pyproject.toml があれば uv sync
+if [ -f "${INSTALL_DIR}/pyproject.toml" ]; then
     cd "$INSTALL_DIR"
     if uv run python -c "import ultralytics" 2>/dev/null; then
         echo "✅ ultralytics は既にインストール済み"
@@ -109,22 +118,31 @@ if [ -f "${INSTALL_DIR}/pyproject.toml" ] && command -v uv &> /dev/null; then
         uv sync --extra yolo --quiet
     fi
 else
-    echo "📦 モデルファイルのみインストールしました"
-    echo "   ※ バイナリ版では物体検出機能は利用できません"
+    # venv なければ作成
+    VENV_DIR="${INSTALL_DIR}/.venv"
+    if [ ! -d "$VENV_DIR" ]; then
+        echo "📥 venv を作成中..."
+        uv venv "$VENV_DIR" --quiet
+    fi
+
+    if "$VENV_DIR/bin/python" -c "import ultralytics" 2>/dev/null; then
+        echo "✅ ultralytics は既にインストール済み"
+    else
+        echo "📥 ultralytics をインストール中... (uv pip install)"
+        uv pip install ultralytics --python "$VENV_DIR/bin/python" --quiet
+    fi
 fi
 
 # Verify download
 if [ -f "$MODEL_FILE" ]; then
     SIZE=$(ls -lh "$MODEL_FILE" | awk '{print $5}')
     echo ""
-    echo "✅ モデルダウンロード完了!"
+    echo "✅ インストール完了!"
     echo "   モデル: ${MODEL_NAME}"
     echo "   ファイル: $MODEL_FILE"
     echo "   サイズ: $SIZE"
-    if [ -f "${INSTALL_DIR}/pyproject.toml" ]; then
-        echo ""
-        echo "LM Lightを再起動すると、画像処理ページで物体検出が利用可能になります"
-    fi
+    echo ""
+    echo "LM Lightを再起動すると、画像処理ページで物体検出が利用可能になります"
 else
     echo "❌ ダウンロードに失敗しました"
     exit 1

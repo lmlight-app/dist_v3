@@ -39,8 +39,8 @@ show_usage() {
     echo "  $0 small --gpu  # smallモデル + GPU版をインストール"
     echo ""
     echo "リモート実行:"
-    echo "  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- small"
-    echo "  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- small --gpu"
+    echo "  curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-transcribe.sh | bash -s -- small"
+    echo "  curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-transcribe.sh | bash -s -- small --gpu"
 }
 
 # Parse arguments
@@ -129,17 +129,30 @@ if [ -f "$ENV_FILE" ]; then
     echo "📝 .envを更新: WHISPER_MODEL=${MODEL_NAME}"
 fi
 
-# GPU mode: install openai-whisper + torch (uv project only)
+# GPU mode: install openai-whisper + torch
 if [ "$GPU_MODE" = true ]; then
     echo ""
-    if [ -f "${INSTALL_DIR}/pyproject.toml" ] && command -v uv &> /dev/null; then
+    # Ensure uv is available
+    if ! command -v uv &> /dev/null; then
+        echo "📥 uv をインストール中..."
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        export PATH="$HOME/.local/bin:$PATH"
+    fi
+
+    if [ -f "${INSTALL_DIR}/pyproject.toml" ]; then
         cd "$INSTALL_DIR"
         echo "📦 GPU版 (openai-whisper + torch) をインストール中... (uv sync)"
         uv sync --extra gpu --quiet
-        echo "✅ GPU版インストール完了"
     else
-        echo "⚠️ バイナリ版では --gpu オプションは利用できません"
+        VENV_DIR="${INSTALL_DIR}/.venv"
+        if [ ! -d "$VENV_DIR" ]; then
+            echo "📥 venv を作成中..."
+            uv venv "$VENV_DIR" --quiet
+        fi
+        echo "📦 GPU版 (openai-whisper + torch) をインストール中... (uv pip install)"
+        uv pip install openai-whisper torch --python "$VENV_DIR/bin/python" --quiet
     fi
+    echo "✅ GPU版インストール完了"
 fi
 
 # Verify download
