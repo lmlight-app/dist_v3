@@ -205,12 +205,16 @@ sudo rm -f /usr/local/bin/lmlight
 **Linux:**
 ```bash
 rm -rf ~/.local/lmlight
+sudo rm -f /usr/local/bin/lmlight
 ```
 
-**Windows:**
+**Windows (PowerShell):**
 
 ```powershell
 Remove-Item -Recurse -Force "$env:LOCALAPPDATA\lmlight"
+# PATH から削除
+$p = [Environment]::GetEnvironmentVariable("Path", "User") -split ";" | Where-Object { $_ -notlike "*lmlight*" }
+[Environment]::SetEnvironmentVariable("Path", ($p -join ";"), "User")
 ```
 
 ## ディレクトリ構造
