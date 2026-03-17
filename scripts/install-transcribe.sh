@@ -132,35 +132,12 @@ fi
 # GPU mode: install openai-whisper + torch
 if [ "$GPU_MODE" = true ]; then
     echo ""
-    # Find and activate venv if available
-    VENV_DIR=""
-    for d in "${INSTALL_DIR}/.venv" "${INSTALL_DIR}/venv"; do
-        if [ -f "$d/bin/activate" ]; then
-            VENV_DIR="$d"
-            break
-        fi
-    done
-
-    if [ -n "$VENV_DIR" ]; then
-        source "$VENV_DIR/bin/activate"
-    fi
-
-    if command -v uv &> /dev/null; then
-        PIP_CMD="uv pip install"
-    elif command -v pip3 &> /dev/null; then
-        PIP_CMD="pip3 install"
-    elif command -v pip &> /dev/null; then
-        PIP_CMD="pip install"
+    if [ -f "${INSTALL_DIR}/pyproject.toml" ] && command -v uv &> /dev/null; then
+        cd "$INSTALL_DIR"
+        echo "📦 GPU版 (openai-whisper + torch) をインストール中... (uv sync)"
+        uv sync --extra gpu --quiet
     else
-        echo "❌ uv, pip3, pip のいずれかが必要です"
-        exit 1
-    fi
-
-    echo "📦 GPU版 (openai-whisper + torch) をインストール中... ($PIP_CMD)"
-    if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
-        $PIP_CMD -e "${INSTALL_DIR}/api[gpu]" --quiet
-    else
-        $PIP_CMD openai-whisper torch --quiet
+        echo "⚠️ 手動でインストールしてください: pip install openai-whisper torch"
     fi
     echo "✅ GPU版インストール完了"
 fi

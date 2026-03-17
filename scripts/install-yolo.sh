@@ -101,39 +101,17 @@ fi
 echo ""
 echo "📦 ultralyticsパッケージを確認中..."
 
-# Find and activate venv if available
-VENV_DIR=""
-for d in "${INSTALL_DIR}/.venv" "${INSTALL_DIR}/venv"; do
-    if [ -f "$d/bin/activate" ]; then
-        VENV_DIR="$d"
-        break
+if [ -f "${INSTALL_DIR}/pyproject.toml" ] && command -v uv &> /dev/null; then
+    # uv project: use uv sync
+    cd "$INSTALL_DIR"
+    if uv run python -c "import ultralytics" 2>/dev/null; then
+        echo "✅ ultralytics は既にインストール済み"
+    else
+        echo "📥 ultralytics をインストール中... (uv sync)"
+        uv sync --extra yolo --quiet
     fi
-done
-
-if [ -n "$VENV_DIR" ]; then
-    source "$VENV_DIR/bin/activate"
-fi
-
-if python3 -c "import ultralytics" 2>/dev/null; then
-    echo "✅ ultralytics は既にインストール済み"
 else
-    if command -v uv &> /dev/null; then
-        PIP_CMD="uv pip install"
-    elif command -v pip3 &> /dev/null; then
-        PIP_CMD="pip3 install"
-    elif command -v pip &> /dev/null; then
-        PIP_CMD="pip install"
-    else
-        echo "❌ uv, pip3, pip のいずれかが必要です"
-        exit 1
-    fi
-
-    echo "📥 ultralytics をインストール中... ($PIP_CMD)"
-    if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
-        $PIP_CMD -e "${INSTALL_DIR}/api[yolo]" --quiet
-    else
-        $PIP_CMD ultralytics --quiet
-    fi
+    echo "⚠️ 手動でインストールしてください: pip install ultralytics"
 fi
 
 # Verify download
