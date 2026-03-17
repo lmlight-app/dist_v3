@@ -132,33 +132,31 @@ fi
 # GPU mode: install openai-whisper + torch
 if [ "$GPU_MODE" = true ]; then
     echo ""
-    # Find venv pip if available
-    VENV_PIP=""
-    for venv_dir in "${INSTALL_DIR}/.venv" "${INSTALL_DIR}/venv"; do
-        if [ -f "$venv_dir/bin/pip" ]; then
-            VENV_PIP="$venv_dir/bin/pip"
+    # Find and activate venv if available
+    VENV_DIR=""
+    for d in "${INSTALL_DIR}/.venv" "${INSTALL_DIR}/venv"; do
+        if [ -f "$d/bin/activate" ]; then
+            VENV_DIR="$d"
             break
         fi
     done
 
-    # Determine install command
-    if [ -n "$VENV_PIP" ]; then
-        PIP_CMD="$VENV_PIP install"
-        echo "📦 GPU版 (openai-whisper + torch) をインストール中... (venv: $VENV_PIP)"
-    elif command -v uv &> /dev/null; then
-        PIP_CMD="uv pip install --python python3"
-        echo "📦 GPU版 (openai-whisper + torch) をインストール中... (uv)"
+    if [ -n "$VENV_DIR" ]; then
+        source "$VENV_DIR/bin/activate"
+    fi
+
+    if command -v uv &> /dev/null; then
+        PIP_CMD="uv pip install"
     elif command -v pip3 &> /dev/null; then
         PIP_CMD="pip3 install"
-        echo "📦 GPU版 (openai-whisper + torch) をインストール中... (pip3)"
     elif command -v pip &> /dev/null; then
         PIP_CMD="pip install"
-        echo "📦 GPU版 (openai-whisper + torch) をインストール中... (pip)"
     else
-        echo "❌ pip が見つかりません。venv を作成するか pip をインストールしてください"
+        echo "❌ uv, pip3, pip のいずれかが必要です"
         exit 1
     fi
 
+    echo "📦 GPU版 (openai-whisper + torch) をインストール中... ($PIP_CMD)"
     if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
         $PIP_CMD -e "${INSTALL_DIR}/api[gpu]" --quiet
     else
