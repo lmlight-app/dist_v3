@@ -134,7 +134,7 @@ if [ "$GPU_MODE" = true ]; then
     echo ""
     # Detect package manager: uv > pip3 > pip
     if command -v uv &> /dev/null; then
-        PIP_CMD="uv pip install"
+        PIP_CMD="uv pip install --system"
     elif command -v pip3 &> /dev/null; then
         PIP_CMD="pip3 install"
     elif command -v pip &> /dev/null; then
