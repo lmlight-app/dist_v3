@@ -100,22 +100,49 @@ fi
 # Install ultralytics if not present
 echo ""
 echo "📦 ultralyticsパッケージを確認中..."
-if python3 -c "import ultralytics" 2>/dev/null; then
+
+# Find venv pip if available
+VENV_PIP=""
+for venv_dir in "${INSTALL_DIR}/.venv" "${INSTALL_DIR}/venv"; do
+    if [ -f "$venv_dir/bin/pip" ]; then
+        VENV_PIP="$venv_dir/bin/pip"
+        break
+    fi
+done
+
+# Check if already installed (in venv or system)
+ALREADY_INSTALLED=false
+if [ -n "$VENV_PIP" ]; then
+    VENV_PYTHON="$(dirname "$VENV_PIP")/python"
+    if "$VENV_PYTHON" -c "import ultralytics" 2>/dev/null; then
+        ALREADY_INSTALLED=true
+    fi
+elif python3 -c "import ultralytics" 2>/dev/null; then
+    ALREADY_INSTALLED=true
+fi
+
+if [ "$ALREADY_INSTALLED" = true ]; then
     echo "✅ ultralytics は既にインストール済み"
 else
-    # Detect package manager: uv > pip3 > pip
-    if command -v uv &> /dev/null; then
-        PIP_CMD="uv pip install --system"
+    # Determine install command
+    if [ -n "$VENV_PIP" ]; then
+        PIP_CMD="$VENV_PIP install"
+        echo "📥 ultralytics をインストール中... (venv: $VENV_PIP)"
+    elif command -v uv &> /dev/null; then
+        PIP_CMD="uv pip install --python python3"
+        echo "📥 ultralytics をインストール中... (uv)"
     elif command -v pip3 &> /dev/null; then
         PIP_CMD="pip3 install"
+        echo "📥 ultralytics をインストール中... (pip3)"
     elif command -v pip &> /dev/null; then
         PIP_CMD="pip install"
+        echo "📥 ultralytics をインストール中... (pip)"
     else
-        echo "❌ uv, pip3, pip のいずれかが必要です"
+        echo "❌ pip が見つかりません。venv を作成するか pip をインストールしてください"
+        echo "   例: python3 -m venv ${INSTALL_DIR}/.venv && ${INSTALL_DIR}/.venv/bin/pip install ultralytics"
         exit 1
     fi
 
-    echo "📥 ultralytics をインストール中... ($PIP_CMD)"
     if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
         $PIP_CMD -e "${INSTALL_DIR}/api[yolo]" --quiet
     else
