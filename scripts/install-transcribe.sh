@@ -21,7 +21,7 @@ get_model_size() {
 }
 
 show_usage() {
-    echo "使用方法: $0 [モデル名]"
+    echo "使用方法: $0 [モデル名] [--gpu]"
     echo ""
     echo "モデル一覧:"
     echo "  tiny   - 74MB  (デフォルト、軽量・高速)"
@@ -30,24 +30,35 @@ show_usage() {
     echo "  medium - 1.5GB (高精度・GPU推奨)"
     echo "  large  - 2.9GB (最高精度・GPU必須)"
     echo ""
+    echo "オプション:"
+    echo "  --gpu  GPU版をインストール (openai-whisper + torch)"
+    echo ""
     echo "例:"
-    echo "  $0           # tinyモデルをインストール"
-    echo "  $0 small     # smallモデルをインストール"
+    echo "  $0              # tinyモデルをインストール (CPU)"
+    echo "  $0 small        # smallモデルをインストール (CPU)"
+    echo "  $0 small --gpu  # smallモデル + GPU版をインストール"
     echo ""
     echo "リモート実行:"
     echo "  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- small"
+    echo "  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-transcribe.sh | bash -s -- small --gpu"
 }
 
 # Parse arguments
-MODEL_NAME="${1:-tiny}"
+MODEL_NAME="tiny"
+GPU_MODE=false
 
-# Validate model name
-if [[ ! " tiny base small medium large " =~ " ${MODEL_NAME} " ]]; then
-    echo "❌ 無効なモデル名: $MODEL_NAME"
-    echo ""
-    show_usage
-    exit 1
-fi
+for arg in "$@"; do
+    case "$arg" in
+        --gpu) GPU_MODE=true ;;
+        tiny|base|small|medium|large) MODEL_NAME="$arg" ;;
+        *)
+            echo "❌ 無効な引数: $arg"
+            echo ""
+            show_usage
+            exit 1
+            ;;
+    esac
+done
 
 # large uses v3 version
 if [ "$MODEL_NAME" = "large" ]; then
@@ -118,6 +129,18 @@ if [ -f "$ENV_FILE" ]; then
     echo "📝 .envを更新: WHISPER_MODEL=${MODEL_NAME}"
 fi
 
+# GPU mode: install openai-whisper + torch
+if [ "$GPU_MODE" = true ]; then
+    echo ""
+    echo "📦 GPU版 (openai-whisper + torch) をインストール中..."
+    if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
+        pip install -e "${INSTALL_DIR}/api[gpu]" --quiet
+    else
+        pip install openai-whisper torch --quiet
+    fi
+    echo "✅ GPU版インストール完了"
+fi
+
 # Verify download
 if [ -f "$MODEL_FILE" ]; then
     SIZE=$(ls -lh "$MODEL_FILE" | awk '{print $5}')
@@ -126,6 +149,11 @@ if [ -f "$MODEL_FILE" ]; then
     echo "   モデル: ${MODEL_NAME}"
     echo "   ファイル: $MODEL_FILE"
     echo "   サイズ: $SIZE"
+    if [ "$GPU_MODE" = true ]; then
+        echo "   GPU: 有効 (openai-whisper)"
+    else
+        echo "   GPU: 無効 (CPU版 pywhispercpp)"
+    fi
     echo ""
     echo "LM Lightを再起動すると、サイドバーに「文字起こし」が表示されます"
 else
