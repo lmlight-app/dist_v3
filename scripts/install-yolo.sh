@@ -117,12 +117,14 @@ fi
 if [ -f "$MODEL_FILE" ]; then
     SIZE=$(ls -lh "$MODEL_FILE" | awk '{print $5}')
     echo ""
-    echo "✅ インストール完了!"
+    echo "✅ モデルダウンロード完了!"
     echo "   モデル: ${MODEL_NAME}"
     echo "   ファイル: $MODEL_FILE"
     echo "   サイズ: $SIZE"
-    echo ""
-    echo "LM Lightを再起動すると、画像処理ページで物体検出が利用可能になります"
+    if [ -f "${INSTALL_DIR}/pyproject.toml" ]; then
+        echo ""
+        echo "LM Lightを再起動すると、画像処理ページで物体検出が利用可能になります"
+    fi
 else
     echo "❌ ダウンロードに失敗しました"
     exit 1
