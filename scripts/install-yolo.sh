@@ -131,6 +131,18 @@ else
         echo "📥 ultralytics をインストール中... (uv pip install)"
         uv pip install ultralytics --python "$VENV_DIR/bin/python" --quiet
     fi
+
+    # Set VENV_PYTHON in .env so the binary can find the venv
+    ENV_FILE="${INSTALL_DIR}/.env"
+    if [ -f "$ENV_FILE" ]; then
+        if grep -q "^VENV_PYTHON=" "$ENV_FILE"; then
+            sed -i.bak "s|^VENV_PYTHON=.*|VENV_PYTHON=$VENV_DIR/bin/python|" "$ENV_FILE"
+            rm -f "${ENV_FILE}.bak"
+        else
+            echo "VENV_PYTHON=$VENV_DIR/bin/python" >> "$ENV_FILE"
+        fi
+        echo "📝 .envを更新: VENV_PYTHON=$VENV_DIR/bin/python"
+    fi
 fi
 
 # Verify download
