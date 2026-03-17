@@ -129,17 +129,17 @@ if [ -f "$ENV_FILE" ]; then
     echo "📝 .envを更新: WHISPER_MODEL=${MODEL_NAME}"
 fi
 
-# GPU mode: install openai-whisper + torch
+# GPU mode: install openai-whisper + torch (uv project only)
 if [ "$GPU_MODE" = true ]; then
     echo ""
     if [ -f "${INSTALL_DIR}/pyproject.toml" ] && command -v uv &> /dev/null; then
         cd "$INSTALL_DIR"
         echo "📦 GPU版 (openai-whisper + torch) をインストール中... (uv sync)"
         uv sync --extra gpu --quiet
+        echo "✅ GPU版インストール完了"
     else
-        echo "⚠️ 手動でインストールしてください: pip install openai-whisper torch"
+        echo "⚠️ バイナリ版では --gpu オプションは利用できません"
     fi
-    echo "✅ GPU版インストール完了"
 fi
 
 # Verify download

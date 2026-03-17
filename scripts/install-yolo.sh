@@ -97,12 +97,10 @@ else
     exit 1
 fi
 
-# Install ultralytics if not present
+# Install ultralytics (uv project only)
 echo ""
-echo "📦 ultralyticsパッケージを確認中..."
-
 if [ -f "${INSTALL_DIR}/pyproject.toml" ] && command -v uv &> /dev/null; then
-    # uv project: use uv sync
+    echo "📦 ultralyticsパッケージを確認中..."
     cd "$INSTALL_DIR"
     if uv run python -c "import ultralytics" 2>/dev/null; then
         echo "✅ ultralytics は既にインストール済み"
@@ -111,7 +109,8 @@ if [ -f "${INSTALL_DIR}/pyproject.toml" ] && command -v uv &> /dev/null; then
         uv sync --extra yolo --quiet
     fi
 else
-    echo "⚠️ 手動でインストールしてください: pip install ultralytics"
+    echo "📦 モデルファイルのみインストールしました"
+    echo "   ※ バイナリ版では物体検出機能は利用できません"
 fi
 
 # Verify download
