@@ -103,11 +103,23 @@ echo "📦 ultralyticsパッケージを確認中..."
 if python3 -c "import ultralytics" 2>/dev/null; then
     echo "✅ ultralytics は既にインストール済み"
 else
-    echo "📥 ultralytics をインストール中..."
-    if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
-        pip install -e "${INSTALL_DIR}/api[yolo]" --quiet
+    # Detect package manager: uv > pip3 > pip
+    if command -v uv &> /dev/null; then
+        PIP_CMD="uv pip install"
+    elif command -v pip3 &> /dev/null; then
+        PIP_CMD="pip3 install"
+    elif command -v pip &> /dev/null; then
+        PIP_CMD="pip install"
     else
-        pip install ultralytics --quiet
+        echo "❌ uv, pip3, pip のいずれかが必要です"
+        exit 1
+    fi
+
+    echo "📥 ultralytics をインストール中... ($PIP_CMD)"
+    if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
+        $PIP_CMD -e "${INSTALL_DIR}/api[yolo]" --quiet
+    else
+        $PIP_CMD ultralytics --quiet
     fi
 fi
 

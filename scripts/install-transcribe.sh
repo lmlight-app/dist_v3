@@ -132,11 +132,23 @@ fi
 # GPU mode: install openai-whisper + torch
 if [ "$GPU_MODE" = true ]; then
     echo ""
-    echo "📦 GPU版 (openai-whisper + torch) をインストール中..."
-    if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
-        pip install -e "${INSTALL_DIR}/api[gpu]" --quiet
+    # Detect package manager: uv > pip3 > pip
+    if command -v uv &> /dev/null; then
+        PIP_CMD="uv pip install"
+    elif command -v pip3 &> /dev/null; then
+        PIP_CMD="pip3 install"
+    elif command -v pip &> /dev/null; then
+        PIP_CMD="pip install"
     else
-        pip install openai-whisper torch --quiet
+        echo "❌ uv, pip3, pip のいずれかが必要です"
+        exit 1
+    fi
+
+    echo "📦 GPU版 (openai-whisper + torch) をインストール中... ($PIP_CMD)"
+    if [ -f "${INSTALL_DIR}/api/pyproject.toml" ]; then
+        $PIP_CMD -e "${INSTALL_DIR}/api[gpu]" --quiet
+    else
+        $PIP_CMD openai-whisper torch --quiet
     fi
     echo "✅ GPU版インストール完了"
 fi
