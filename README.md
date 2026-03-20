@@ -34,14 +34,37 @@ irm https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-windows.
 
 ### 必要な依存関係
 
-| 依存関係 | macOS | Linux (Ubuntu/Debian) | Windows |
-|---------|-------|----------------------|---------|
-| Node.js 18+ | `brew install node` | `sudo apt install nodejs npm` | `winget install OpenJS.NodeJS.LTS` |
-| PostgreSQL 17 | `brew install postgresql@17` | `sudo apt install postgresql` | `winget install PostgreSQL.PostgreSQL.17` |
-| pgvector | `brew install pgvector` | `sudo apt install postgresql-17-pgvector` | [手動インストール](https://github.com/pgvector/pgvector#windows) |
-| Ollama | `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` | `winget install Ollama.Ollama` |
-| FFmpeg (文字起こし用) | `brew install ffmpeg` | `sudo apt install ffmpeg` | `winget install Gyan.FFmpeg` |
-| Tesseract OCR  | `brew install tesseract` | `sudo apt install tesseract-ocr` | `winget install UB-Mannheim.TesseractOCR` |
+#### macOS
+
+Node.js 18+, PostgreSQL 17, pgvector, Ollama, FFmpeg, Tesseract OCR
+
+```bash
+brew install node postgresql@17 pgvector ollama ffmpeg tesseract
+```
+
+#### Linux (Ubuntu/Debian)
+
+Node.js 18+, PostgreSQL 17, pgvector, FFmpeg, Tesseract OCR, Ollama
+
+```bash
+sudo apt install -y nodejs npm postgresql postgresql-17-pgvector ffmpeg tesseract-ocr
+```
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+#### Windows
+
+> **⚠️ [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) が必須です。** pgvector のビルドや一部の依存パッケージのコンパイルに必要なため、先にインストールしてください。
+
+Node.js 18+, PostgreSQL 17, Ollama, FFmpeg, Tesseract OCR
+
+```powershell
+winget install OpenJS.NodeJS.LTS PostgreSQL.PostgreSQL.17 Ollama.Ollama Gyan.FFmpeg UB-Mannheim.TesseractOCR
+```
+
+pgvector は [手動インストール](https://github.com/pgvector/pgvector#windows) が必要です。
 
 ### データベース
 
