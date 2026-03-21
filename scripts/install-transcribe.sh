@@ -1,5 +1,5 @@
 #!/bin/bash
-# LM Light - Transcription Model Installer
+# AI Server - Transcription Model Installer
 # Downloads Whisper model for speech-to-text functionality
 
 set -e
@@ -71,7 +71,7 @@ fi
 MODEL_SIZE="$(get_model_size "$MODEL_NAME")"
 
 echo "=========================================="
-echo "  LM Light 文字起こしモデル インストーラー"
+echo "  AI Server 文字起こしモデル インストーラー"
 echo "=========================================="
 echo ""
 echo "選択モデル: ${MODEL_NAME} (${MODEL_SIZE})"
@@ -88,8 +88,8 @@ fi
 
 # Check install directory
 if [ ! -d "$INSTALL_DIR" ]; then
-    echo "❌ LM Lightがインストールされていません"
-    echo "   先にLM Lightをインストールしてください"
+    echo "❌ AI Serverがインストールされていません"
+    echo "   先にAI Serverをインストールしてください"
     exit 1
 fi
 
@@ -169,7 +169,7 @@ if [ -f "$MODEL_FILE" ]; then
         echo "   GPU: 無効 (CPU版 pywhispercpp)"
     fi
     echo ""
-    echo "LM Lightを再起動すると、サイドバーに「文字起こし」が表示されます"
+    echo "AI Serverを再起動すると、サイドバーに「文字起こし」が表示されます"
 else
     echo "❌ ダウンロードに失敗しました"
     exit 1

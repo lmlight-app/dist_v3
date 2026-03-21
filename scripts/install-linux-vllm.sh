@@ -1,5 +1,5 @@
 #!/bin/bash
-# LM Light Installer for Linux (vLLM Edition)
+# AI Server Installer for Linux (vLLM Edition)
 set -e
 
 BASE_URL="${LMLIGHT_BASE_URL:-https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/latest}"
@@ -7,7 +7,7 @@ INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight-vllm}"
 ARCH="$(uname -m)"
 case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esac
 
-echo " Installing LM Light vLLM Edition ($ARCH) to $INSTALL_DIR"
+echo " Installing AI Server vLLM Edition ($ARCH) to $INSTALL_DIR"
 
 mkdir -p "$INSTALL_DIR"/{app,logs}
 
@@ -87,7 +87,7 @@ rm -f /tmp/lmlight-app.tar.gz
 
 [ ! -f "$INSTALL_DIR/.env" ] && cat > "$INSTALL_DIR/.env" << EOF
 # =============================================================================
-# LM Light Configuration (vLLM Edition)
+# AI Server Configuration (vLLM Edition)
 # =============================================================================
 
 # Python path for vLLM (auto-configured by installer)
@@ -222,7 +222,7 @@ fi
 # Stop existing
 pkill -f "lmlight-vllm.*api" 2>/dev/null; pkill -f "node.*server.js" 2>/dev/null; sleep 1
 
-echo "🚀 Starting LM Light (vLLM Edition)..."
+echo "🚀 Starting AI Server (vLLM Edition)..."
 
 # Start API (vLLM auto-start is handled by the API if VLLM_AUTO_START=true)
 ./api &

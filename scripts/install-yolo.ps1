@@ -1,4 +1,4 @@
-# LM Light - YOLO Model Installer
+# AI Server - YOLO Model Installer
 # Downloads YOLO model for object detection functionality
 
 param(
@@ -45,7 +45,7 @@ $ModelFile = "$ModelDir\$ModelName.pt"
 $ModelSize = $ModelSizes[$ModelName]
 
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "  LM Light YOLO物体検出モデル インストーラー" -ForegroundColor Cyan
+Write-Host "  AI Server YOLO物体検出モデル インストーラー" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "選択モデル: $ModelName ($ModelSize)" -ForegroundColor White
@@ -62,8 +62,8 @@ if (Test-Path $ModelFile) {
 
 # Check install directory
 if (-not (Test-Path $InstallDir)) {
-    Write-Host "❌ LM Lightがインストールされていません" -ForegroundColor Red
-    Write-Host "   先にLM Lightをインストールしてください"
+    Write-Host "❌ AI Serverがインストールされていません" -ForegroundColor Red
+    Write-Host "   先にAI Serverをインストールしてください"
     exit 1
 }
 
@@ -166,7 +166,7 @@ if (Test-Path $ModelFile) {
     Write-Host "   ファイル: $ModelFile"
     Write-Host "   サイズ: $SizeStr"
     Write-Host ""
-    Write-Host "LM Lightを再起動すると、画像処理ページで物体検出が利用可能になります" -ForegroundColor Cyan
+    Write-Host "AI Serverを再起動すると、画像処理ページで物体検出が利用可能になります" -ForegroundColor Cyan
 } else {
     Write-Host "❌ ダウンロードに失敗しました" -ForegroundColor Red
     exit 1

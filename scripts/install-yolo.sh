@@ -1,5 +1,5 @@
 #!/bin/bash
-# LM Light - YOLO Model Installer
+# AI Server - YOLO Model Installer
 # Downloads YOLO model for object detection functionality
 
 set -e
@@ -56,7 +56,7 @@ MODEL_FILE="${MODEL_DIR}/${MODEL_NAME}.pt"
 MODEL_SIZE="$(get_model_size "$MODEL_NAME")"
 
 echo "=========================================="
-echo "  LM Light YOLO物体検出モデル インストーラー"
+echo "  AI Server YOLO物体検出モデル インストーラー"
 echo "=========================================="
 echo ""
 echo "選択モデル: ${MODEL_NAME} (${MODEL_SIZE})"
@@ -73,8 +73,8 @@ fi
 
 # Check install directory
 if [ ! -d "$INSTALL_DIR" ]; then
-    echo "❌ LM Lightがインストールされていません"
-    echo "   先にLM Lightをインストールしてください"
+    echo "❌ AI Serverがインストールされていません"
+    echo "   先にAI Serverをインストールしてください"
     exit 1
 fi
 
@@ -154,7 +154,7 @@ if [ -f "$MODEL_FILE" ]; then
     echo "   ファイル: $MODEL_FILE"
     echo "   サイズ: $SIZE"
     echo ""
-    echo "LM Lightを再起動すると、画像処理ページで物体検出が利用可能になります"
+    echo "AI Serverを再起動すると、画像処理ページで物体検出が利用可能になります"
 else
     echo "❌ ダウンロードに失敗しました"
     exit 1

@@ -1,4 +1,4 @@
-# LM Light Dependency Checker
+# AI Server Dependency Checker
 # Checks if all required dependencies are installed
 
 $ErrorActionPreference = "SilentlyContinue"
@@ -14,19 +14,19 @@ function Show-InstallInstructions {
         [string[]]$MissingDeps
     )
 
-    $host.UI.RawUI.WindowTitle = "LM Light - 依存関係チェック"
+    $host.UI.RawUI.WindowTitle = "AI Server - 依存関係チェック"
 
     Write-Host ""
     Write-Host "╔═══════════════════════════════════════════════════════╗" -ForegroundColor Yellow
-    Write-Host "║     LM Light 依存関係チェック                        ║" -ForegroundColor Yellow
+    Write-Host "║     AI Server 依存関係チェック                        ║" -ForegroundColor Yellow
     Write-Host "╚═══════════════════════════════════════════════════════╝" -ForegroundColor Yellow
     Write-Host ""
 
     if ($MissingDeps.Count -eq 0) {
         Write-Host "[✓] すべての依存関係がインストールされています！" -ForegroundColor Green
         Write-Host ""
-        Write-Host "LM Light を起動できます:" -ForegroundColor Cyan
-        Write-Host "  スタートメニュー → LM Light → LM Light" -ForegroundColor White
+        Write-Host "AI Server を起動できます:" -ForegroundColor Cyan
+        Write-Host "  スタートメニュー → AI Server → AI Server" -ForegroundColor White
         Write-Host ""
         Write-Host "または、PowerShellで:" -ForegroundColor Cyan
         Write-Host "  powershell -ExecutionPolicy Bypass -File `"$PSScriptRoot\start.ps1`"" -ForegroundColor White

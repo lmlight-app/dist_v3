@@ -1,4 +1,4 @@
-# LM Light インストーラー for Windows
+# AI Server インストーラー for Windows
 # 使い方: irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
 
 $ErrorActionPreference = "Stop"
@@ -31,7 +31,7 @@ function Write-Warn { param($msg) Write-Host "[警告] $msg" -ForegroundColor Ye
 
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════╗" -ForegroundColor Blue
-Write-Host "║      LM Light インストーラー for Windows             ║" -ForegroundColor Blue
+Write-Host "║      AI Server インストーラー for Windows             ║" -ForegroundColor Blue
 Write-Host "╚═══════════════════════════════════════════════════════╝" -ForegroundColor Blue
 Write-Host ""
 
@@ -529,7 +529,7 @@ Write-Info "ステップ 5/5: 設定を作成中..."
 # .env ファイル作成 (存在しない場合のみ)
 if (-not (Test-Path "$INSTALL_DIR\.env")) {
     $ENV_CONTENT = @"
-# LM Light Configuration
+# AI Server Configuration
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}
 OLLAMA_BASE_URL=http://localhost:11434
 # OLLAMA_NUM_PARALLEL=8
@@ -571,7 +571,7 @@ NEXT_PUBLIC_AUTH_MODE=local
 
 # 起動スクリプト作成
 $START_SCRIPT = @'
-# LM Light 起動スクリプト
+# AI Server 起動スクリプト
 $INSTALL_DIR = "$env:LOCALAPPDATA\lmlight"
 Set-Location $INSTALL_DIR
 
@@ -606,7 +606,7 @@ if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
     }
 }
 
-Write-Host "LM Light を起動中..." -ForegroundColor Blue
+Write-Host "AI Server を起動中..." -ForegroundColor Blue
 
 # PostgreSQL チェック
 $pgService = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -643,7 +643,7 @@ Write-Host "Web を起動中..."
 $appProcess = Start-Process -FilePath "node" -ArgumentList "server.js" -WorkingDirectory "$INSTALL_DIR\app" -NoNewWindow -PassThru
 
 Write-Host ""
-Write-Host "LM Light が起動しました！" -ForegroundColor Green
+Write-Host "AI Server が起動しました！" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Web UI: http://localhost:$($env:WEB_PORT)"
 Write-Host "  API:    http://localhost:$($env:API_PORT)"
@@ -680,20 +680,20 @@ Set-Content -Path "$INSTALL_DIR\start.ps1" -Value $START_SCRIPT -Encoding UTF8
 
 # 停止スクリプト作成
 $STOP_SCRIPT = @'
-# LM Light 停止スクリプト
-Write-Host "LM Light を停止中..."
+# AI Server 停止スクリプト
+Write-Host "AI Server を停止中..."
 
 Get-Process -Name "api" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*lmlight*" } | Stop-Process -Force
 Get-Process -Name "node" -ErrorAction SilentlyContinue | Where-Object { $_.Path -like "*lmlight*" } | Stop-Process -Force
 
-Write-Host "LM Light を停止しました" -ForegroundColor Green
+Write-Host "AI Server を停止しました" -ForegroundColor Green
 '@
 
 Set-Content -Path "$INSTALL_DIR\stop.ps1" -Value $STOP_SCRIPT -Encoding UTF8
 
 # トグルスクリプト作成（macOSと同様の動作）
 $TOGGLE_SCRIPT = @'
-# LM Light トグルスクリプト
+# AI Server トグルスクリプト
 # 起動中ならStop、停止中ならStart
 
 $INSTALL_DIR = "$env:LOCALAPPDATA\lmlight"
@@ -724,8 +724,8 @@ if ($isRunning) {
     [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
     $template = [Windows.UI.Notifications.ToastTemplateType]::ToastText01
     $xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($template)
-    $xml.GetElementsByTagName("text").Item(0).AppendChild($xml.CreateTextNode("LM Light stopped")) | Out-Null
-    $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("LM Light")
+    $xml.GetElementsByTagName("text").Item(0).AppendChild($xml.CreateTextNode("AI Server stopped")) | Out-Null
+    $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("AI Server")
     $notifier.Show([Windows.UI.Notifications.ToastNotification]::new($xml))
 } else {
     # 停止中 → 起動
@@ -750,11 +750,11 @@ if ($isRunning) {
         [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
         $template = [Windows.UI.Notifications.ToastTemplateType]::ToastText01
         $xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($template)
-        $xml.GetElementsByTagName("text").Item(0).AppendChild($xml.CreateTextNode("LM Light is running")) | Out-Null
-        $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("LM Light")
+        $xml.GetElementsByTagName("text").Item(0).AppendChild($xml.CreateTextNode("AI Server is running")) | Out-Null
+        $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("AI Server")
         $notifier.Show([Windows.UI.Notifications.ToastNotification]::new($xml))
     } else {
-        [System.Windows.MessageBox]::Show("Failed to start. Check $INSTALL_DIR\logs\", "LM Light")
+        [System.Windows.MessageBox]::Show("Failed to start. Check $INSTALL_DIR\logs\", "AI Server")
     }
 }
 '@
@@ -763,7 +763,7 @@ Set-Content -Path "$INSTALL_DIR\toggle.ps1" -Value $TOGGLE_SCRIPT -Encoding UTF8
 
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║     LM Light のインストールが完了しました！          ║" -ForegroundColor Green
+Write-Host "║     AI Server のインストールが完了しました！          ║" -ForegroundColor Green
 Write-Host "╚═══════════════════════════════════════════════════════╝" -ForegroundColor Green
 Write-Host ""
 

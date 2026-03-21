@@ -1,5 +1,5 @@
 #!/bin/bash
-# LM Light Installer for Linux
+# AI Server Installer for Linux
 set -e
 
 BASE_URL="${LMLIGHT_BASE_URL:-https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/latest}"
@@ -7,7 +7,7 @@ INSTALL_DIR="${LMLIGHT_INSTALL_DIR:-$HOME/.local/lmlight}"
 ARCH="$(uname -m)"
 case "$ARCH" in x86_64|amd64) ARCH="amd64" ;; aarch64|arm64) ARCH="arm64" ;; esac
 
-echo "Installing LM Light ($ARCH) to $INSTALL_DIR"
+echo "Installing AI Server ($ARCH) to $INSTALL_DIR"
 
 mkdir -p "$INSTALL_DIR"/{app,logs}
 
@@ -22,7 +22,7 @@ tar -xzf "/tmp/lmlight-app.tar.gz" -C "$INSTALL_DIR/app"
 rm -f /tmp/lmlight-app.tar.gz
 
 [ ! -f "$INSTALL_DIR/.env" ] && cat > "$INSTALL_DIR/.env" << EOF
-# LM Light Configuration
+# AI Server Configuration
 DATABASE_URL=postgresql://lmlight:lmlight@localhost:5432/lmlight
 OLLAMA_BASE_URL=http://localhost:11434
 # OLLAMA_NUM_PARALLEL=8
@@ -82,7 +82,7 @@ pgrep -x ollama >/dev/null || { ollama serve &>/dev/null & sleep 2; }
 # Stop existing
 pkill -f "lmlight.*api" 2>/dev/null; pkill -f "node.*server.js" 2>/dev/null; sleep 1
 
-echo "🚀 Starting LM Light..."
+echo "🚀 Starting AI Server..."
 
 # Start API
 ./api &

@@ -1,12 +1,12 @@
 #!/bin/bash
-# LM Light Database Setup for macOS/Linux
+# AI Server Database Setup for macOS/Linux
 set -e
 
 DB_USER="${DB_USER:-lmlight}"
 DB_PASS="${DB_PASS:-lmlight}"
 DB_NAME="${DB_NAME:-lmlight}"
 
-echo "Setting up LM Light database..."
+echo "Setting up AI Server database..."
 
 if ! command -v psql &>/dev/null; then
     echo "❌ psql not found. Please install PostgreSQL first."

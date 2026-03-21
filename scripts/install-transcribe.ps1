@@ -1,4 +1,4 @@
-# LM Light - Transcription Model Installer
+# AI Server - Transcription Model Installer
 # Downloads Whisper model for speech-to-text functionality
 
 param(
@@ -52,7 +52,7 @@ if ($ModelName -eq "large") {
 $ModelSize = $ModelSizes[$ModelName]
 
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "  LM Light 文字起こしモデル インストーラー" -ForegroundColor Cyan
+Write-Host "  AI Server 文字起こしモデル インストーラー" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "選択モデル: $ModelName ($ModelSize)" -ForegroundColor White
@@ -69,8 +69,8 @@ if (Test-Path $ModelFile) {
 
 # Check install directory
 if (-not (Test-Path $InstallDir)) {
-    Write-Host "❌ LM Lightがインストールされていません" -ForegroundColor Red
-    Write-Host "   先にLM Lightをインストールしてください"
+    Write-Host "❌ AI Serverがインストールされていません" -ForegroundColor Red
+    Write-Host "   先にAI Serverをインストールしてください"
     exit 1
 }
 
@@ -122,7 +122,7 @@ if (Test-Path $ModelFile) {
     Write-Host "   ファイル: $ModelFile"
     Write-Host "   サイズ: $SizeStr"
     Write-Host ""
-    Write-Host "LM Lightを再起動すると、サイドバーに「文字起こし」が表示されます" -ForegroundColor Cyan
+    Write-Host "AI Serverを再起動すると、サイドバーに「文字起こし」が表示されます" -ForegroundColor Cyan
 } else {
     Write-Host "❌ ダウンロードに失敗しました" -ForegroundColor Red
     exit 1
