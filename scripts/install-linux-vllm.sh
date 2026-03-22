@@ -133,6 +133,7 @@ VLLM_GPU_MEMORY_UTILIZATION_EMBED=0.10
 
 # Additional vLLM arguments (space-separated, passed directly to vllm serve)
 # Examples: --enforce-eager, --enable-prefix-caching, --quantization awq, --dtype half
+#VLLM_REASONING_PARSER=qwen3 
 # VLLM_EXTRA_ARGS_CHAT=--enforce-eager --enable-prefix-caching
 # VLLM_EXTRA_ARGS_EMBED=--enforce-eager
 # VLLM_EXTRA_ARGS_VISION=--enforce-eager
