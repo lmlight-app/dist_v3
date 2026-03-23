@@ -44,14 +44,24 @@ brew install node postgresql@17 pgvector ollama ffmpeg tesseract
 
 #### Linux (Ubuntu/Debian)
 
-Node.js 18+, PostgreSQL 17, pgvector, FFmpeg, Tesseract OCR, Ollama
+Node.js 18+, PostgreSQL, FFmpeg, Tesseract OCR, Ollama
 
 ```bash
-sudo apt install -y nodejs npm postgresql postgresql-17-pgvector ffmpeg tesseract-ocr
+sudo apt install -y nodejs npm postgresql ffmpeg tesseract-ocr
 ```
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
+```
+
+**pgvector:** インストール済みの PostgreSQL バージョンに合わせてインストールしてください。
+
+```bash
+# PostgreSQL のバージョン確認
+psql --version
+
+# バージョンに合わせてインストール (例: PG17 の場合)
+sudo apt install -y postgresql-17-pgvector
 ```
 
 #### Windows
@@ -272,10 +282,22 @@ curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-l
 | 依存関係 | インストール |
 |---------|------------|
 | Node.js 18+ | `sudo apt install nodejs npm` |
-| PostgreSQL 17 + pgvector | `sudo apt install postgresql postgresql-17-pgvector` |
-| NVIDIA GPU + CUDA 12.x | [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) |
+| PostgreSQL | `sudo apt install postgresql` |
+| uv (Python パッケージマネージャー) | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
 | FFmpeg (文字起こし用) | `sudo apt install ffmpeg` |
 | Tesseract OCR | `sudo apt install tesseract-ocr tesseract-ocr-jpn` |
+
+※ NVIDIA GPU + CUDA 12.x 以上が必要です。CUDA 13 にも対応しています。
+
+**pgvector:** インストール済みの PostgreSQL バージョンに合わせてインストールしてください。
+
+```bash
+# PostgreSQL のバージョン確認
+psql --version
+
+# バージョンに合わせてインストール (例: PG17 の場合)
+sudo apt install -y postgresql-17-pgvector
+```
 
 ### 設定ファイル (.env)
 
