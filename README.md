@@ -22,22 +22,6 @@ curl -fsSL https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-l
 irm https://pub-a2cab4360f1748cab5ae1c0f12cddc0a.r2.dev/scripts/install-windows.ps1 | iex
 ```
 
-### Staging (GitHub Releases直接、R2昇格前のテスト用)
-
-```bash
-# macOS
-LMLIGHT_BASE_URL=https://github.com/lmlight-app/dist_v3/releases/latest/download \
-  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-macos.sh | bash
-
-# Linux
-LMLIGHT_BASE_URL=https://github.com/lmlight-app/dist_v3/releases/latest/download \
-  curl -fsSL https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-linux.sh | bash
-
-# Windows
-$env:LMLIGHT_BASE_URL="https://github.com/lmlight-app/dist_v3/releases/latest/download"
-irm https://raw.githubusercontent.com/lmlight-app/dist_v3/main/scripts/install-windows.ps1 | iex
-```
-
 ---
 
 インストール先:
